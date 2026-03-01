@@ -2087,13 +2087,17 @@ body::before {
   font-size: 12px;
   font-weight: 700;
   color: var(--color-accent);
-  text-align: center;
-  padding: 4px 10px;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 8px;
-  margin-bottom: 6px;
-  white-space: nowrap;
+  text-align: left;
+  padding: 0;
+  background: none;
+  margin-bottom: 4px;
   letter-spacing: 0.3px;
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  gap: 0 6px;
+  line-height: 1.4;
 }
 
 /* ---- AI Commentary ---- */

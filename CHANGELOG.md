@@ -4,6 +4,13 @@
 
 ## Version History
 
+### 03-01-2026
+
+**v15 [Chuck]** Redesign turn counter above draw pile.
+- Removed black background pill
+- Split "Round X — Turn X" into two left-aligned lines with numbers vertically aligned
+- Uses CSS grid for clean column layout
+
 ### 02-28-2026
 
 **v14 [Chuck]** Update PLAN.md session log.

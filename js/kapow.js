@@ -4303,7 +4303,7 @@ function refreshUI() {
   // Turn counter
   var turnCounterEl = document.getElementById('turn-counter');
   if (turnCounterEl) {
-    turnCounterEl.textContent = 'Round ' + gameState.round + ' \u2014 Turn ' + gameState.turnNumber;
+    turnCounterEl.innerHTML = '<span>Round</span><span>' + gameState.round + '</span><span>Turn</span><span>' + gameState.turnNumber + '</span>';
   }
 
   // Mobile score bar — cumulative scores + current round
