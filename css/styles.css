@@ -2548,10 +2548,11 @@ body:has(#page-layout:not(.hidden)) #help-toggle {
 }
 
 .help-modal-content > h2 {
-  font-family: var(--font-display);
-  font-size: 28px;
+  font-family: var(--font-body);
+  font-size: 24px;
+  font-weight: 700;
   color: var(--color-accent);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   text-align: center;
   padding: 24px 24px 0;
   margin: 0;
@@ -2632,10 +2633,11 @@ body:has(#page-layout:not(.hidden)) #help-toggle {
 }
 
 .help-panel h3 {
-  font-family: var(--font-display);
-  font-size: 20px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
   color: var(--color-accent);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   margin: 16px 0 8px;
 }
 
@@ -2674,7 +2676,7 @@ body:has(#page-layout:not(.hidden)) #help-toggle {
 .help-panel em {
   color: var(--color-accent);
   font-style: normal;
-  font-weight: 600;
+  font-weight: normal;
 }
 
 /* Card type badges in Cards tab */

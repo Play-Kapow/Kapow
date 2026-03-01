@@ -6,6 +6,11 @@
 
 ### 02-28-2026
 
+**v11 [Chuck]** Rewrite How to Play modal text + switch headers from Bangers to DM Sans for readability.
+- All 5 tabs rewritten with expanded explanations (Basics, Cards, Turns, Scoring, Tips)
+- Help modal h2/h3 headers switched from Bangers display font to DM Sans body font
+- Fixes blurry yellow header text on mobile
+
 **v10 [Eric]** Docs cleanup — all URLs now point to cpheterson/Kapow as canonical repo.
 - README, CONTRIBUTING, CLAUDE.md, PLAN.md updated with correct clone/deploy URLs
 - CONTRIBUTING: added Common Gotchas section, hook setup emphasis, repo history updated to reflect completed merge

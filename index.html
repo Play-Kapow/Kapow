@@ -267,7 +267,7 @@
         <a href="#" class="scorecard-deck-link footer-buy" onclick="event.preventDefault();event.stopPropagation();showBuyModal()">Get the Card Game &rarr;</a>
       </div>
     </div>
-    <div class="scorecard-version">02-28-2026 v10</div>
+    <div class="scorecard-version">03-01-2026 v1</div>
     </div>
     <div id="ai-commentary"></div>
   </div>
@@ -373,17 +373,18 @@
       <!-- Tab: Basics -->
       <div id="help-basics" class="help-panel active">
         <h3>Goal</h3>
-        <p>Have the <strong>fewest points</strong> after 10 rounds. Cards in your hand count against you &mdash; get rid of them by completing triads.</p>
+        <p>KAPOW! is a rummy style card game in which players compete to have the <strong>fewest points</strong> after 10 rounds of play. In each round, players start with a hand of face down cards. Through successive moves, cards are revealed and may be retained, discarded, or replaced. The cards in the deck will provide you with many paths to success. Seizing opportunities and avoiding pitfalls are key to winning. Kai can be a tough opponent, but also a good teacher. So, put on your thinking cap and enjoy Kapow!</p>
 
         <h3>Setup</h3>
-        <p>Each player gets <strong>12 cards face-down</strong> arranged in 4 columns of 3 (called <em>triads</em>). The remaining cards form a draw pile, with one card face-up starting the discard pile.</p>
+        <p>Each player is dealt <strong>12 face-down cards</strong>, arranged in 4 vertical columns of 3 cards each, referred to as <em>triads</em>. The remaining cards form a draw pile, with one card face-up starting the discard pile.</p>
 
         <h3>What's a Triad?</h3>
-        <p>Each column of 3 cards is a triad. Complete a triad and it gets <strong>discarded for 0 points</strong>. A triad is complete when it contains:</p>
+        <p>Your task is to <strong>complete</strong> each triad in your hand. Complete triads get discarded, thus removing points from your hand. A triad is complete when it contains:</p>
         <ul>
           <li><strong>Three of a kind</strong> &mdash; same value in all 3 positions (e.g. 7, 7, 7)</li>
-          <li><strong>A run</strong> &mdash; three consecutive values (e.g. 5, 6, 7 or 10, 11, 12)</li>
+          <li><strong>A run</strong> &mdash; three consecutive values, ascending or descending (e.g. 5, 6, 7 or 12, 11, 10)</li>
         </ul>
+        <p>The card closest to the center of the table is in the <strong>top</strong> position of a triad. This holds true for cards in Kai's hand as well. When a complete triad is discarded, the card in its top position is placed face up on the discard pile with all other discarded cards beneath it.</p>
 
         <div class="help-video">
           <a href="https://youtu.be/xAY-B_t0T34" target="_blank" rel="noopener">Watch video tutorial &rarr;</a>
@@ -399,7 +400,7 @@
           <div class="help-card-badge help-badge-fixed">5</div>
           <div>
             <strong>Fixed Cards (96)</strong><br>
-            Values 0&ndash;12. Eight of each (except 1 and 2 which have four each). Simple &mdash; the number on the card is its value.
+            Values 0&ndash;12. Eight of each (except 1 and 2 which have four each). Simple &mdash; the number on the card is its point value.
           </div>
         </div>
 
@@ -407,7 +408,11 @@
           <div class="help-card-badge help-badge-power">P</div>
           <div>
             <strong>Power Cards (16)</strong><br>
-            Have a face value (1 or 2) <em>plus</em> modifier values (&plusmn;1 or &plusmn;2). Play them alone for face value, or <strong>stack under another card</strong> to modify that position's value. Stacked cards form a <em>powerset</em> &mdash; they move as a unit.
+            A powercard has a face value of 1 or 2. The plus and minus signs on a powercard indicate that they can also be used to raise or lower the value of a position in a triad by the face value amount of the card. When placed alone in a position, the position's value is 1 or 2. When placed in combination with a face up card in a position, the position's value is increased or decreased by the modifier value selected. For example, a powercard with a &plusmn; value of 2 can be used to modify the value of a position with a value of 5 to a value of 3 or 7, depending upon the modifier selected.
+            <br><br>
+            The combined cards are referred to as a <em>powerset</em>. A powerset may be discarded as a whole but the cards within it may not be separated. Additional powercards, however, may be applied to a powerset, thereby raising or lowering its value.
+            <br><br>
+            A powercard that is placed alone in a position can be converted to a powerset by placing a fixed value card, or powercard, in the same position. Kai will offer you placement options to choose from.
           </div>
         </div>
 
@@ -415,7 +420,9 @@
           <div class="help-card-badge help-badge-kapow">K!</div>
           <div>
             <strong>KAPOW! Cards (6)</strong><br>
-            Wild cards (value 0&ndash;12). Worth <strong>+25 points</strong> until used in a triad. Once placed, you can <strong>swap their position</strong> with any other card. When a KAPOW! card completes a triad, it locks in place and can no longer be moved.
+            Wild cards (value 0&ndash;12). In addition to being a wild card, KAPOW! cards are mobile. During your turn, you can swap a KAPOW! card with any card or powerset in your hand. You may perform multiple KAPOW! swaps before ending your turn.
+            <br><br>
+            These cards count as <strong>+25 points</strong> until discarded in a complete triad. It is best to use or discard them before the end of a round.
           </div>
         </div>
       </div>
@@ -423,24 +430,26 @@
       <!-- Tab: Turns -->
       <div id="help-turns" class="help-panel">
         <h3>First Turn</h3>
-        <p><strong>Reveal any 2 cards</strong> in your hand (click them). Then draw a card and play it.</p>
+        <p><strong>Reveal any 2 cards</strong> in your hand (click them). Then draw a card and play it to your best advantage.</p>
 
-        <h3>Each Turn After</h3>
+        <h3>Each Turn Thereafter</h3>
         <ol>
           <li><strong>Draw</strong> &mdash; click the draw pile or discard pile to pick up a card</li>
           <li><strong>Play it</strong> &mdash; either:
             <ul>
               <li><strong>Discard it</strong> &mdash; click the discard pile</li>
-              <li><strong>Replace a card</strong> &mdash; click any card in your hand (the old card goes to discard)</li>
-              <li><strong>Create a powerset</strong> &mdash; stack it on a face-up power card</li>
+              <li><strong>Replace a card</strong> &mdash; click any card or powerset in your hand (the replaced card(s) go to the discard pile)</li>
+              <li><strong>Create a powerset</strong> &mdash; click on any card or powerset in your hand. Kai will present you with various ways you can play the card.</li>
             </ul>
           </li>
-          <li>Any completed triads are <strong>automatically discarded</strong></li>
-          <li>You may <strong>swap a free KAPOW! card</strong> with another card in your hand</li>
+          <li>You may <strong>swap a free KAPOW! card</strong> with another card in your hand. Once a KAPOW! card is used within a complete triad, however, it may only be swapped within the triad.</li>
+          <li>Any completed triads are <strong>discarded</strong>, and your turn ends.</li>
         </ol>
 
         <h3>Going Out</h3>
-        <p>When all your cards are revealed or discarded, the round ends. Each other player gets <strong>one final turn</strong> (all hidden cards are revealed first).</p>
+        <p>When all of a player's cards are revealed or discarded, the player's round has ended. Other players then get <strong>one final turn</strong>. First, they reveal all hidden cards in their hand, then choose a card from the draw or discard pile and play it to their best advantage. KAPOW! swaps, if desired, may then be taken and their turn ends.</p>
+        <p>You may choose to go out with incomplete triads in your hand. This makes sense when you believe other players will be caught with more points than yours after their final turn. Triads with a value less than zero should also be retained. Avoid building negative value triads into a valid run or set, which requires them to be discarded.</p>
+        <p>The player that goes out first starts the next round.</p>
       </div>
 
       <!-- Tab: Scoring -->
@@ -450,27 +459,27 @@
           <li><strong>Completed triads</strong> = 0 points (already discarded)</li>
           <li><strong>Incomplete triads</strong> = sum of card values in each position</li>
           <li><strong>Unused KAPOW!</strong> = +25 points each</li>
-          <li><strong>KAPOW! in a powerset</strong> = value of the powerset, not 25</li>
-          <li>Power cards in a powerset use their modifier values</li>
+          <li><strong>Powersets</strong> = the sum of the fixed value and powercards with it</li>
         </ul>
 
         <h3>Going-Out Penalty</h3>
-        <p>If you go out first but <strong>don't have the lowest score</strong>, your score for that round is <strong>doubled</strong>. Going out is risky &mdash; make sure you're actually winning!</p>
+        <p>If you go out first but <strong>don't have the lowest score</strong>, your score for that round is <strong>doubled</strong>. Going out first is risky &mdash; only do this if you believe your score will be the lowest of all players after their final turn.</p>
 
         <h3>After 10 Rounds</h3>
-        <p>Lowest total score wins.</p>
+        <p>The player with the lowest total score wins.</p>
       </div>
 
       <!-- Tab: Strategy -->
       <div id="help-strategy" class="help-panel">
         <h3>Quick Tips</h3>
         <ul>
-          <li><strong>Complete high-value triads first</strong> &mdash; getting rid of 12s early is better than perfecting 3s</li>
-          <li><strong>Build triads with multiple outs</strong> &mdash; a triad with 9, 9, and 11 can be completed by drawing 9, 10, or a KAPOW!</li>
-          <li><strong>Power cards can make negative values</strong> &mdash; a -2 power under a 0 = -2 points. Keep those!</li>
-          <li><strong>Watch the discard pile</strong> &mdash; when you complete a triad, its top card becomes available to your opponent</li>
+          <li><strong>Build triads with multiple paths to completion</strong> &mdash; a triad with 9, 9, and 11 can be completed by drawing 9, 10, -2, or a KAPOW! Put the odds in your favor.</li>
+          <li><strong>Power cards can make negative values</strong> &mdash; a -2 power under a 0 = -2 points. Negative value triads help to lower your score.</li>
+          <li><strong>Play defensively</strong> &mdash; when you complete a triad, its top card becomes available to your opponent on the discard pile. When placing cards in a triad, try placing cards in the top position that are not helpful to your opponent.</li>
+          <li><strong>Play offensively</strong> &mdash; cards in the top position of your opponent's triads may become available to you if the triad is discarded. You may want to build your triads with that in mind.</li>
           <li><strong>Don't go out too early</strong> &mdash; if Kai has a lower score, yours gets doubled</li>
-          <li><strong>KAPOW! cards are flexible</strong> &mdash; swap them around to where they're needed most, but once they complete a triad they lock in place</li>
+          <li><strong>Take advantage of swaps</strong> &mdash; swap KAPOW! cards as needed to build and complete triads. Remember, a KAPOW! card may be swapped before your turn ends, even if it was used to complete a triad. If possible, avoid giving it to your opponent.</li>
+          <li><strong>Shed points</strong> &mdash; late in a round, don't get stuck with high value cards in your hand. When your opponent is close to going out, seek to replace high value cards with lower value cards. You may also want to avoid choosing KAPOW! cards if they are not immediately useful to your hand. After your last turn they count as +25 points if they remain in your hand.</li>
         </ul>
 
         <h3>Use "Understand Kai's Move"</h3>
