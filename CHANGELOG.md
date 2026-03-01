@@ -6,6 +6,8 @@
 
 ### 02-28-2026
 
+**v12 [Chuck]** Update PLAN.md with 03-01-2026 session log.
+
 **v11 [Chuck]** Rewrite How to Play modal text + switch headers from Bangers to DM Sans for readability.
 - All 5 tabs rewritten with expanded explanations (Basics, Cards, Turns, Scoring, Tips)
 - Help modal h2/h3 headers switched from Bangers display font to DM Sans body font

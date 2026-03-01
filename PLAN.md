@@ -4,11 +4,11 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-## Current State (02-28-2026)
+## Current State (03-01-2026)
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 02-28-2026 v1
+**Version:** 03-01-2026 v1
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -23,6 +23,21 @@ The living document. Updated in real-time throughout every session.
 - Dopamine hits: round win celebrations, streak badges, personal best detection
 - Leaderboard (top 25 lowest-score winners from telemetry API)
 - Game history saved to localStorage (last 50 games)
+
+---
+
+## Session Log (03-01-2026)
+
+### Shipped
+- [x] Rewrite How to Play modal — all 5 tabs rewritten with expanded game explanations
+- [x] Fix blurry help modal headers on mobile — switched h2/h3 from Bangers to DM Sans
+
+### In Progress
+- [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
+
+### Blocked
+
+### Next Up
 
 ---
 
@@ -42,13 +57,8 @@ The living document. Updated in real-time throughout every session.
 - [x] Delay round-end splash until player clicks "Round Over: Continue" button
   - Added `roundEndAcknowledged` flag, gated `showRoundEnd()` in `refreshUI()`, handled click in `onEndTurn()`, reset in `onNextRound()`
 - [x] Fix POWERSET label not centered on mobile — conflicting `left`/`right`/`transform` in 480px breakpoint
-
-### In Progress
-- [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
-
-### Blocked
-
-### Next Up
+- [x] Fix FIXED label displaced to bottom-right on mobile — keep all card type labels centered at top
+- [x] Shorten round-end button text to "Continue"
 
 ---
 
@@ -78,4 +88,4 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-*Last updated: 02-28-2026*
+*Last updated: 03-01-2026*
