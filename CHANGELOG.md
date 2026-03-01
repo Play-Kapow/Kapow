@@ -6,6 +6,8 @@
 
 ### 03-01-2026
 
+**v16 [Chuck]** Update PLAN.md session log.
+
 **v15 [Chuck]** Redesign turn counter above draw pile.
 - Removed black background pill
 - Split "Round X — Turn X" into two left-aligned lines with numbers vertically aligned

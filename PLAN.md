@@ -8,7 +8,7 @@ The living document. Updated in real-time throughout every session.
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 03-01-2026 v4
+**Version:** 03-01-2026 v6
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -35,6 +35,7 @@ The living document. Updated in real-time throughout every session.
 - [x] Make AI go-out decision more conservative
   - Doubled-score cap 30→20, high-score caution 20→15, opponent final-turn estimate 3→5
   - Early/mid game: AI must be strictly ahead to go out (removed +5 margin)
+- [x] Redesign turn counter — removed black background, split into two left-aligned lines with numbers vertically aligned via CSS grid
 
 ### In Progress
 - [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
