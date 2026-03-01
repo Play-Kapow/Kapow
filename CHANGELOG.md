@@ -6,6 +6,8 @@
 
 ### 02-28-2026
 
+**v14 [Chuck]** Update PLAN.md session log.
+
 **v13 [Chuck]** Make AI go-out decision more conservative.
 - Doubled-score cap lowered from 30 to 20
 - High-score caution threshold lowered from 20 to 15

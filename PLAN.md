@@ -8,7 +8,7 @@ The living document. Updated in real-time throughout every session.
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 03-01-2026 v1
+**Version:** 03-01-2026 v4
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -31,6 +31,10 @@ The living document. Updated in real-time throughout every session.
 ### Shipped
 - [x] Rewrite How to Play modal — all 5 tabs rewritten with expanded game explanations
 - [x] Fix blurry help modal headers on mobile — switched h2/h3 from Bangers to DM Sans
+- [x] Update hint text for draw phase
+- [x] Make AI go-out decision more conservative
+  - Doubled-score cap 30→20, high-score caution 20→15, opponent final-turn estimate 3→5
+  - Early/mid game: AI must be strictly ahead to go out (removed +5 margin)
 
 ### In Progress
 - [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
@@ -84,7 +88,7 @@ The living document. Updated in real-time throughout every session.
 
 - [ ] **Cross-turn memory** — track what opponent draws from discard to infer their strategy
 - [ ] **Personality system** — difficulty levels via aggressive/conservative/chaotic AI styles
-- [ ] **Tighter go-out decision** — factor opponent's estimated score + round number more aggressively
+- [x] **Tighter go-out decision** — factor opponent's estimated score + round number more aggressively (shipped 03-01-2026)
 
 ---
 
