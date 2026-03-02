@@ -8,7 +8,7 @@ The living document. Updated in real-time throughout every session.
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 03-01-2026 v8
+**Version:** 03-01-2026 v10
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -40,6 +40,10 @@ The living document. Updated in real-time throughout every session.
   - Fixed `aiFindBeneficialSwap()` to check face-down targets for triad completion
   - Updated modular `triad.js` with KAPOW wildcard support in `isTriadComplete()`
   - 2 regression tests added (cross-triad + within-triad scenarios)
+- [x] Fix final-turn scoring — AI now sheds maximum points on last turn
+  - Modifier/powerset bonuses stripped on final turns (pure point reduction only)
+  - Triad completion compared against best replacement by actual points saved
+  - 2 regression tests added (R6T26 powerset vs replacement, R4T32 completion vs replacement)
 
 ### In Progress
 - [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
@@ -95,6 +99,7 @@ The living document. Updated in real-time throughout every session.
 - [ ] **Personality system** — difficulty levels via aggressive/conservative/chaotic AI styles
 - [x] **Tighter go-out decision** — factor opponent's estimated score + round number more aggressively (shipped 03-01-2026)
 - [x] **Cross-triad KAPOW swap lookahead** — AI considers KAPOW swaps from other triads when evaluating placement (shipped 03-01-2026)
+- [x] **Final-turn point shedding** — strip powerset/modifier bonuses on last turn, compare all options by actual points saved (shipped 03-01-2026)
 
 ---
 

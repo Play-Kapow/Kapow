@@ -6,6 +6,8 @@
 
 ### 03-01-2026
 
+**v20 [Chuck]** Update PLAN.md session log.
+
 **v19 [Chuck]** AI: fix final-turn scoring to maximize point shedding.
 - Modifier/powerset bonuses stripped on final turns — only pure point reduction counts
 - Triad completion on final turn compared against best replacement by actual points saved
