@@ -8,7 +8,7 @@ The living document. Updated in real-time throughout every session.
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 03-01-2026 v6
+**Version:** 03-01-2026 v8
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -36,6 +36,10 @@ The living document. Updated in real-time throughout every session.
   - Doubled-score cap 30→20, high-score caution 20→15, opponent final-turn estimate 3→5
   - Early/mid game: AI must be strictly ahead to go out (removed +5 margin)
 - [x] Redesign turn counter — removed black background, split into two left-aligned lines with numbers vertically aligned via CSS grid
+- [x] AI cross-triad KAPOW swap lookahead — placement scoring now considers swapping a KAPOW from another triad to complete the target triad
+  - Fixed `aiFindBeneficialSwap()` to check face-down targets for triad completion
+  - Updated modular `triad.js` with KAPOW wildcard support in `isTriadComplete()`
+  - 2 regression tests added (cross-triad + within-triad scenarios)
 
 ### In Progress
 - [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
@@ -90,6 +94,7 @@ The living document. Updated in real-time throughout every session.
 - [ ] **Cross-turn memory** — track what opponent draws from discard to infer their strategy
 - [ ] **Personality system** — difficulty levels via aggressive/conservative/chaotic AI styles
 - [x] **Tighter go-out decision** — factor opponent's estimated score + round number more aggressively (shipped 03-01-2026)
+- [x] **Cross-triad KAPOW swap lookahead** — AI considers KAPOW swaps from other triads when evaluating placement (shipped 03-01-2026)
 
 ---
 
