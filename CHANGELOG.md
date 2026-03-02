@@ -6,6 +6,12 @@
 
 ### 03-01-2026
 
+**v19 [Chuck]** AI: fix final-turn scoring to maximize point shedding.
+- Modifier/powerset bonuses stripped on final turns — only pure point reduction counts
+- Triad completion on final turn compared against best replacement by actual points saved
+- Added final-turn awareness to modular `ai.js`
+- Added 2 regression tests reproducing R6T26 and R4T32 scenarios
+
 **v18 [Chuck]** Update PLAN.md session log.
 
 **v17 [Chuck]** AI: cross-triad KAPOW swap lookahead for placement decisions.

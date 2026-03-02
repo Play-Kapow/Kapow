@@ -1789,6 +1789,7 @@ function aiDecideAction(gameState, drawnCard) {
   }
 
   // Score powerset-on-power opportunities
+  var isFinalTurnPSP = gameState && gameState.phase === 'finalTurns';
   if (drawnCard.type === 'fixed' || drawnCard.type === 'power') {
     var powersetSpot = aiFindPowersetOpportunity(aiHand, drawnCard);
     if (powersetSpot) {
@@ -1796,11 +1797,13 @@ function aiDecideAction(gameState, drawnCard) {
       var existingValue = getPositionValue(aiHand.triads[powersetSpot.triadIndex][powersetSpot.position]);
       var modCard = aiHand.triads[powersetSpot.triadIndex][powersetSpot.position][0];
       var modValue = powersetSpot.usePositive ? modCard.modifiers[1] : modCard.modifiers[0];
-      var newValue = (drawnCard.type === 'fixed' ? drawnCard.faceValue : drawnCard.faceValue) + modValue;
-      var improvement = existingValue - newValue;
+      var pspNewValue = (drawnCard.type === 'fixed' ? drawnCard.faceValue : drawnCard.faceValue) + modValue;
+      var improvement = existingValue - pspNewValue;
+      // On final turns, no bonus — pure score shedding only
+      var pspBonus = isFinalTurnPSP ? 0 : 10;
       candidates.push({
         action: powersetSpot,
-        score: improvement + 10,  // bonus for creating powerset
+        score: improvement + pspBonus,
         reason: 'creates powerset in Triad ' + (powersetSpot.triadIndex + 1)
       });
     }
@@ -3651,13 +3654,34 @@ function aiFindModifierOpportunity(hand, drawnCard) {
         activeModifier: usePositive ? drawnCard.modifiers[1] : drawnCard.modifiers[0] };
       triad[positions[p]] = [origCards[0], simCard];
 
-      var analysis = aiAnalyzeTriad(triad);
+      var isFinalTurnMod = gameState && gameState.phase === 'finalTurns';
       var triadBonus = 0;
-      if (analysis.isNearComplete && (analysis.completionPaths > 0 || analysis.powerModifierPaths > 0)) {
-        triadBonus = 10 + (analysis.completionPaths * 2) + analysis.powerModifierPaths;
-        if (analysis.kapowBoost) triadBonus += 1;
+
+      if (isFinalTurnMod) {
+        // Final turn: score modifier by actual points saved, directly comparable
+        // to placement scores (which use pure currentValue - newValue).
+        // Completing a triad zeroes it out — the bonus is the sum of the
+        // original triad values (what we'd otherwise be stuck with).
+        if (isTriadComplete(triad)) {
+          var triadOrigPoints = 0;
+          for (var mti = 0; mti < 3; mti++) {
+            var mtOrig = (positions[mti] === positions[p]) ? origCards : triad[positions[mti]];
+            if (mtOrig.length > 0) triadOrigPoints += getPositionValue(mtOrig);
+          }
+          // triadOrigPoints is the total we save by completing. The `improvement`
+          // variable already counted the single-position delta, so subtract it
+          // to avoid double-counting, then add the full triad savings.
+          triadBonus = triadOrigPoints - improvement;
+        }
+        synergyDestroyPenalty = 0; // irrelevant on final turn
+      } else {
+        var analysis = aiAnalyzeTriad(triad);
+        if (analysis.isNearComplete && (analysis.completionPaths > 0 || analysis.powerModifierPaths > 0)) {
+          triadBonus = 10 + (analysis.completionPaths * 2) + analysis.powerModifierPaths;
+          if (analysis.kapowBoost) triadBonus += 1;
+        }
+        if (isTriadComplete(triad)) triadBonus = 80;
       }
-      if (isTriadComplete(triad)) triadBonus = 80;
 
       triad[positions[p]] = origCards; // restore
 

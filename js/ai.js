@@ -67,6 +67,36 @@ export function aiDecideDraw(gameState) {
  */
 export function aiDecideAction(gameState, drawnCard) {
   const aiHand = gameState.players[1].hand;
+  const isFinalTurn = gameState.phase === 'finalTurns';
+
+  // Final turn: pure score shedding — compare all options by actual points saved.
+  if (isFinalTurn) {
+    const cardValue = drawnCard.type === 'kapow' ? 25 : drawnCard.faceValue;
+
+    // Check if drawn card completes a triad — calculate actual points saved
+    const completionSpot = findTriadCompletionSpot(aiHand, drawnCard);
+    let completionSavings = 0;
+    if (completionSpot) {
+      const cTriad = aiHand.triads[completionSpot.triadIndex];
+      for (const pos of ['top', 'middle', 'bottom']) {
+        if (cTriad[pos].length > 0) completionSavings += getPositionValue(cTriad[pos]);
+      }
+    }
+
+    // Check best replacement — highest value card replaced by drawn card
+    const highPos = findHighestValuePosition(aiHand);
+    const replacementSavings = (highPos && highPos.value > cardValue) ?
+      highPos.value - cardValue : 0;
+
+    // Pick whichever saves more points
+    if (completionSavings > 0 && completionSavings >= replacementSavings) {
+      return { type: 'replace', ...completionSpot };
+    }
+    if (replacementSavings > 0) {
+      return { type: 'replace', triadIndex: highPos.triadIndex, position: highPos.position };
+    }
+    return { type: 'discard' };
+  }
 
   // Strategy 1: If drawn card completes a triad, place it
   const completionSpot = findTriadCompletionSpot(aiHand, drawnCard);

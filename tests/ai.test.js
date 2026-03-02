@@ -234,6 +234,44 @@ describe('aiDecideAction', () => {
     expect(action.type).toBe('replace');
     expect(action.position).toBe('bottom'); // the unrevealed position
   });
+
+  test('final turn: replaces high card instead of building powerset (R6T26)', () => {
+    // Reproduces R6T26: AI has T3[12, 1, P2]. Drew P1 on final turn.
+    // Replacing the 12 with P1 (faceValue=1) saves 11 points.
+    // Building a powerset (P1 modifier on P2) only saves ~3 points.
+    // AI must prefer replacing the 12.
+    const aiTriads = [
+      { ...makeTriad(fc(1), fc(1), fc(1)), isDiscarded: true },  // T1 discarded
+      { ...makeTriad(fc(1), fc(1), fc(1)), isDiscarded: true },  // T2 discarded
+      makeTriad(fc(12), fc(1), powerCard(2, [-2, 2])),           // T3: [12, 1, P2]
+      { ...makeTriad(fc(1), fc(1), fc(1)), isDiscarded: true },  // T4 discarded
+    ];
+    const state = makeAiState(aiTriads, { phase: 'finalTurns' });
+    const action = aiDecideAction(state, powerCard(1, [-1, 1]));
+
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(2);
+    expect(action.position).toBe('top'); // replace the 12, not build powerset
+  });
+
+  test('final turn: replaces high card instead of low-value triad completion (R4T32)', () => {
+    // Reproduces R4T32: AI has T1[12, 4, 5], T3[P1, 0, P1], T4[0, 2, 2].
+    // Drew P2 on final turn. Completing T3 via modifier only saves ~2 points.
+    // Replacing the 12 in T1 with P2 (faceValue=2) saves 10 points.
+    // AI must prefer replacing the 12.
+    const aiTriads = [
+      makeTriad(fc(12), fc(4), fc(5)),                           // T1: [12, 4, 5]
+      { ...makeTriad(fc(1), fc(1), fc(1)), isDiscarded: true },  // T2 discarded
+      makeTriad(powerCard(1, [-1, 1]), fc(0), powerCard(1, [-1, 1])),  // T3: [P1, 0, P1]
+      makeTriad(fc(0), fc(2), fc(2)),                            // T4: [0, 2, 2]
+    ];
+    const state = makeAiState(aiTriads, { phase: 'finalTurns' });
+    const action = aiDecideAction(state, powerCard(2, [-2, 2]));
+
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(0);
+    expect(action.position).toBe('top'); // replace the 12, not complete low-value T3
+  });
 });
 
 describe('aiDecideRevealAfterDiscard', () => {
