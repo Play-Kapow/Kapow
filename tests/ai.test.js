@@ -127,6 +127,25 @@ describe('aiDecideAction', () => {
     expect(action.position).toBe('bottom'); // replace the 9
   });
 
+  test('prefers completing high-value triad over low-value triad with KAPOW (R7T8)', () => {
+    // Reproduces R7T8: AI has T1=[fd(P1),11,10] and T2=[5,5,6].
+    // Drew KAPOW. KAPOW can complete T1 as [K!(12),11,10] run (21 known pts)
+    // or T2 as [5,5,K!(5)] set (10 known pts). T1 eliminates more points.
+    // AI must prefer T1 completion.
+    const aiTriads = [
+      makeTriad(powerCard(1, [-1, 1]), fc(11), fc(10)),  // T1: [P1, 11, 10]
+      makeTriad(5, 5, 6),                                 // T2: [5, 5, 6]
+    ];
+    // Make T1 top face-down to match the scenario
+    aiTriads[0].top[0].isRevealed = false;
+    const state = makeAiState(aiTriads);
+    const action = aiDecideAction(state, kapowCard());
+
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(0); // T1, not T2
+    expect(action.position).toBe('top'); // replace the fd card, K!=12 completes [12,11,10]
+  });
+
   test('places card to enable cross-triad KAPOW swap completion', () => {
     // Reproduces R2T18: AI has T3[fd(8), 5, fd(5)] and T4[fd(5), K!, 3].
     // Drawing a 6: placing in T3 top gives [6, 5, fd(5)], then swapping

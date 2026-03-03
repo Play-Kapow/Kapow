@@ -6,6 +6,12 @@
 
 ### 03-01-2026
 
+**v22 [Chuck]** AI: undo face-down synergy penalty when placement completes a triad.
+- `aiScorePlacement()` was penalizing KAPOW placements into face-down slots even when they completed the triad
+- Synergy check used KAPOW's strategic value (15) instead of recognizing it as a wildcard, so it thought KAPOW didn't fit [11,10]
+- Fix: when `placementCompletesTriad` or `placementCompletesViaKapowSwap`, undo the synergy penalty since the triad is being discarded
+- Added R7T8 regression test (prefer completing high-value triad over low-value one)
+
 **v21 [Chuck]** AI: evaluate both positive and negative modifiers for power card placement.
 - `aiFindModifierOpportunity()` now loops over both modifiers instead of always picking the lowest value
 - Fixes cases where +modifier completes a triad (e.g., P1 +1 on 6 in [7,6,7] → [7,7,7] set)

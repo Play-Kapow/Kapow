@@ -2915,11 +2915,15 @@ function aiScorePlacement(hand, card, triadIndex, position) {
         existingPoints += 6; // estimated average for face-down
       }
     }
+    // Undo face-down synergy penalty — it's irrelevant since the triad is being
+    // discarded. The penalty was computed before we knew placement completes.
+    score -= existingSynergyPenalty;
     score += 100 + existingPoints;
   } else if (placementCompletesViaKapowSwap) {
     // One within-triad KAPOW swap after this placement would complete the triad.
     // Treat this almost like direct completion — slightly discounted because it
     // requires the swap step, but still overwhelmingly the best move.
+    score -= existingSynergyPenalty; // undo — triad will be discarded
     score += 80 + kapowSwapExistingPoints;
   } else {
     // Analyze the triad AFTER placement

@@ -53,6 +53,11 @@ The living document. Updated in real-time throughout every session.
   - Fixes cases where +modifier completes a triad (e.g., P1 +1 on 6 in [7,6,7] → [7,7,7])
   - Updated modular `ai.js` with matching logic
   - 1 regression test added (R3T17 scenario)
+- [x] Fix face-down synergy penalty applying when placement completes triad
+  - KAPOW into [fd,11,10] was penalized -35 because synergy check used strategic value 15 (not wildcard)
+  - Penalty is now undone when completion is detected — triad is being discarded, synergy is irrelevant
+  - Also applies to KAPOW-swap completions
+  - 1 regression test added (R7T8: high-value triad completion preferred over low-value)
 
 ### In Progress
 - [ ] Power card face redesign: minus/plus signs flanking center value, POWER label stays at top
