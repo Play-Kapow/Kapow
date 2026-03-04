@@ -6,6 +6,8 @@
 
 ### 03-04-2026
 
+**v8 [Chuck]** Update PLAN.md with session progress.
+
 **v7 [Chuck]** Auto-bump service worker cache in pre-commit hook.
 - Step 3 added to hook: increments `CACHE_NAME` in sw.js on every commit
 - No more manual cache bumps needed — returning users always get fresh code

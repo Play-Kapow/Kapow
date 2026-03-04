@@ -4,11 +4,11 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-## Current State (03-03-2026)
+## Current State (03-04-2026)
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 03-03-2026 v24
+**Version:** 03-04-2026 v8
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -38,6 +38,10 @@ The living document. Updated in real-time throughout every session.
 - [x] AI: more defensive go-out decision with uncertain margins (R3T24)
   - Lowered high-score caution threshold from 15 to 12 in `aiShouldGoOutWithScore()`
   - Fixes: Kai went out with 12 pts, 2-point margin over estimated opponent, 3 unknowns — doubled to 24
+- [x] Auto-bump service worker cache in pre-commit hook
+  - Step 3 added: increments `CACHE_NAME` in sw.js on every commit
+  - No more manual cache bumps — returning users always get fresh code
+  - Updated CLAUDE.md: added step 3, removed manual bump from common mistakes
 
 ---
 
