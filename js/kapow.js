@@ -3590,10 +3590,10 @@ function aiShouldGoOutWithScore(gameState, aiScore) {
   }
 
   // HIGH SCORE CAUTION: Even if estimates say we're winning, going out with a high
-  // score is risky when the margin is thin. Doubling 15+ points is painful
+  // score is risky when the margin is thin. Doubling 12+ points is painful
   // if the estimate is wrong. Only block if the margin is slim (within 10 points of
   // estimated opponent score) AND opponent still has unknowns that could swing things.
-  if (aiScore >= 15 && opponentEval.unrevealedCount > 0 &&
+  if (aiScore >= 12 && opponentEval.unrevealedCount > 0 &&
       aiScore >= opponentFinalEst - 10) {
     return { shouldGoOut: false, reason: 'score too high with uncertain margin (' + aiScore + ' vs est. ' + opponentFinalEst + ')' };
   }

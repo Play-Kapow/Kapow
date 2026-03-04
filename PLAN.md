@@ -35,6 +35,9 @@ The living document. Updated in real-time throughout every session.
   - Fixes: safety for completion cards drops from 42→27, placement penalty 8→23 (rejected)
   - Added `aiEvaluateDiscardSafety()` to modular `ai.js` with matching logic
   - 2 regression tests added
+- [x] AI: more defensive go-out decision with uncertain margins (R3T24)
+  - Lowered high-score caution threshold from 15 to 12 in `aiShouldGoOutWithScore()`
+  - Fixes: Kai went out with 12 pts, 2-point margin over estimated opponent, 3 unknowns — doubled to 24
 
 ---
 

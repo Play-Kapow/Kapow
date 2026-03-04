@@ -6,6 +6,11 @@
 
 ### 03-04-2026
 
+**v5 [Chuck]** AI: more defensive go-out decision with uncertain margins (R3T24).
+- Lowered high-score caution threshold from 15 to 12 in `aiShouldGoOutWithScore()`
+- Prevents going out when score is 12+ and margin is thin with opponent unknowns
+- Fixes R3T24: Kai went out with 12 pts, 2-point margin, 3 opponent unknowns — doubled to 24
+
 **v4 [Chuck]** Bump service worker cache to v54.
 
 **v3 [Chuck]** AI: stronger discard safety when feeding opponent a triad completion (R8T20).
