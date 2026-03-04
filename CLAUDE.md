@@ -65,8 +65,9 @@ Runs automatically on `git commit` (requires `git config core.hooksPath hooks`):
 
 1. Runs all tests - blocks commit on failure
 2. Auto-bumps version (`MM-DD-YYYY vN` in index.html) - don't bump manually
-3. Blocks if CHANGELOG.md wasn't updated (skip with `--no-verify`)
-4. Syncs "Latest Version" footer in CHANGELOG.md
+3. Auto-bumps service worker cache (`CACHE_NAME` in sw.js) - don't bump manually
+4. Blocks if CHANGELOG.md wasn't updated (skip with `--no-verify`)
+5. Syncs "Latest Version" footer in CHANGELOG.md
 
 **IMPORTANT:** After cloning, you MUST run `git config core.hooksPath hooks` or the hook won't run. This is easy to forget and means versions won't auto-bump and tests won't gate commits.
 
@@ -93,9 +94,8 @@ GitHub Pages auto-deploys on push to `main`. Live at https://cpheterson.github.i
 2. **Editing modular files but not kapow.js (or vice versa)** — the game loads `kapow.js`, tests load the modular files. They must stay in sync for game logic changes.
 3. **Manually bumping the version in index.html** — the pre-commit hook does this. Manual bumps can cause conflicts between contributors.
 4. **Forgetting to update CHANGELOG.md** — the hook will block your commit. Add an entry describing what changed.
-5. **Not bumping `CACHE_NAME` in sw.js** — when shipping significant changes, bump it so returning users get the new version. This is NOT auto-bumped.
-6. **Testing only on desktop** — this is a mobile-first game. Always check mobile viewport (375px width) after UI changes. Add to iPhone home screen for true PWA testing.
-7. **Breaking the AI explanation modal** — `buildAiExplanation()` in kapow.js builds HTML that shows in the "Understand Kai's Move" modal. If you change AI logic, make sure the explanation still makes sense.
+5. **Testing only on desktop** — this is a mobile-first game. Always check mobile viewport (375px width) after UI changes. Add to iPhone home screen for true PWA testing.
+6. **Breaking the AI explanation modal** — `buildAiExplanation()` in kapow.js builds HTML that shows in the "Understand Kai's Move" modal. If you change AI logic, make sure the explanation still makes sense.
 
 ## Two Contributors, One Repo
 

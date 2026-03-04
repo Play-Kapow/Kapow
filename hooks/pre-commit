@@ -74,7 +74,19 @@ if [ -f "$HTML" ]; then
   fi
 fi
 
-# ── 3. Changelog check ──────────────────────
+# ── 3. Auto-bump service worker cache ─────────
+SW="$ROOT/sw.js"
+if [ -f "$SW" ]; then
+  SW_CURRENT=$(sed -n "s/.*CACHE_NAME = 'kapow-v\([0-9]*\)'.*/\1/p" "$SW")
+  if [ -n "$SW_CURRENT" ]; then
+    SW_NEW=$((SW_CURRENT + 1))
+    sed -i '' "s|CACHE_NAME = 'kapow-v${SW_CURRENT}'|CACHE_NAME = 'kapow-v${SW_NEW}'|" "$SW"
+    git add "$SW"
+    echo "Service worker cache bumped: v$SW_CURRENT -> v$SW_NEW"
+  fi
+fi
+
+# ── 4. Changelog check ──────────────────────
 CHANGELOG="$ROOT/CHANGELOG.md"
 if [ -f "$CHANGELOG" ]; then
   if ! git diff --cached --name-only | grep -q "CHANGELOG.md"; then

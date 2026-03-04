@@ -6,6 +6,10 @@
 
 ### 03-04-2026
 
+**v7 [Chuck]** Auto-bump service worker cache in pre-commit hook.
+- Step 3 added to hook: increments `CACHE_NAME` in sw.js on every commit
+- No more manual cache bumps needed — returning users always get fresh code
+
 **v6 [Chuck]** Bump service worker cache to v55.
 
 **v5 [Chuck]** AI: more defensive go-out decision with uncertain margins (R3T24).
