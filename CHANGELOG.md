@@ -6,6 +6,8 @@
 
 ### 03-04-2026
 
+**v4 [Chuck]** Bump service worker cache to v54.
+
 **v3 [Chuck]** AI: stronger discard safety when feeding opponent a triad completion (R8T20).
 - Increased completion penalty in `aiEvaluateDiscardSafety()` from -25 to -40
 - Fixes R8T20: Kai no longer discards a 9 into opponent's near-complete triad — safety drops from 42→27, placement penalty 8→23 (rejected)
