@@ -3469,11 +3469,18 @@ function aiEvaluateDrawFromDiscard(gameState) {
     }
   }
 
-  // On final turns, any guaranteed score improvement is worth drawing from discard.
-  // Every point matters — a known improvement beats a random deck draw.
+  // On final turns, only draw from discard if the card value is at or below the
+  // average deck card value (~6). Above that, the deck statistically offers better
+  // savings — and bad deck draws can always be discarded with no downside.
+  // E.g., discard 10 replacing KAPOW(25) saves 15, but avg deck draw saves ~19.
   var isFinalTurnDraw = gameState && gameState.phase === 'finalTurns';
   if (isFinalTurnDraw && bestPlacementScore > 0) {
-    return { shouldDraw: true, reason: 'final turn — guaranteed improvement' };
+    var discardPlacementValue = discardTop.type === 'kapow' ? 25 :
+      discardTop.type === 'power' ? 0 : discardTop.faceValue;
+    if (discardPlacementValue <= 6) {
+      return { shouldDraw: true, reason: 'final turn — guaranteed improvement' };
+    }
+    // Discard value > 6: deck likely offers better improvement
   }
 
   // Draw if the best placement gives meaningful improvement (> threshold)

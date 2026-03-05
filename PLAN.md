@@ -29,6 +29,11 @@ The living document. Updated in real-time throughout every session.
 ## Session Log (03-04-2026)
 
 ### Shipped
+- [x] AI: smarter final-turn draw decision — prefer deck over high-value discard (R2T48)
+  - `aiEvaluateDrawFromDiscard()` now compares discard card value against avg deck value (~6)
+  - Only draws from discard on final turns when card value ≤ 6; above that, deck is statistically better
+  - Deck draws have no downside risk — bad draws can always be discarded
+  - Fixes: Kai drew 10 from discard to replace KAPOW (saves 15) instead of deck (expected ~19 savings)
 - [x] AI: stronger path loss penalty in placement scoring (R2T18)
   - Increased path loss multiplier in `aiScorePlacement()` from 8 to 15
   - Each lost path ≈ 1/13 chance per draw of shedding 15-20+ points — justifies ~15 penalty
