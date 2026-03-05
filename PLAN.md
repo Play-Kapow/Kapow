@@ -29,6 +29,10 @@ The living document. Updated in real-time throughout every session.
 ## Session Log (03-04-2026)
 
 ### Shipped
+- [x] AI: stronger path loss penalty in placement scoring (R2T18)
+  - Increased path loss multiplier in `aiScorePlacement()` from 8 to 15
+  - Each lost path ≈ 1/13 chance per draw of shedding 15-20+ points — justifies ~15 penalty
+  - Fixes: Kai placed 2 in T3-middle (killed a completion path for 6-point save) instead of T4-middle (all face-down, preserves T3 flexibility)
 - [x] AI: stronger discard safety when feeding opponent a triad completion (R8T20)
   - Increased completion penalty in `aiEvaluateDiscardSafety()` from -25 to -40
   - Applies to all near-complete triads (KAPOW or not) — same defensive failure with [fd,9,9]

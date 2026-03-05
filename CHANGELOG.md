@@ -6,6 +6,11 @@
 
 ### 03-04-2026
 
+**v9 [Chuck]** AI: stronger path loss penalty in placement scoring (R2T18).
+- Increased path loss multiplier in `aiScorePlacement()` from 8 to 15
+- Each lost completion path costs ~15 expected points over remaining turns
+- Fixes R2T18: Kai no longer sacrifices T3's completion flexibility for a 6-point save — places card in all-face-down T4 instead
+
 **v8 [Chuck]** Update PLAN.md with session progress.
 
 **v7 [Chuck]** Auto-bump service worker cache in pre-commit hook.

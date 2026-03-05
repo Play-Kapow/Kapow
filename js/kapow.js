@@ -2950,7 +2950,7 @@ function aiScorePlacement(hand, card, triadIndex, position) {
       // The AI should not trade completion flexibility for raw score reduction.
       if (pathsBefore > 0 && futures.totalPaths < pathsBefore) {
         var pathLoss = pathsBefore - futures.totalPaths;
-        score -= pathLoss * 8;
+        score -= pathLoss * 15;
       }
 
       // Matched-pair destruction penalty: if the card being replaced is part of a matched
