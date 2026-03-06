@@ -743,3 +743,75 @@ describe('No-peek: face-down cards scored uniformly', () => {
     expect(actionA.position).toBe(actionB.position);
   });
 });
+
+describe('Completion feeds opponent go-out', () => {
+  test('R6T20: skips completion when triad card lets opponent go out', () => {
+    // AI hand: T3[fd,3,3] T4[fd,fd,fd] (T1,T2 discarded)
+    // Opponent: only T4[fd,2,1] remains (1 triad left, needs 3 for [3,2,1] run)
+    // Drawn: KAPOW. Completing T3 [K!,3,3] puts a 3 on the discard pile.
+    // Opponent grabs the 3, completes [3,2,1], goes out. Kai stuck with T4[fd,fd,fd] ≈ 18 pts.
+    // AI should NOT complete T3 — place KAPOW elsewhere instead.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },             // T1: discarded
+      { ...makeTriad(0, 0, 0), isDiscarded: true },             // T2: discarded
+      makeTriad(fc(7, false), fc(3), fc(3)),                     // T3: [fd,3,3]
+      makeTriad(fc(7, false), fc(12, false), fc(5, false)),      // T4: [fd,fd,fd]
+    ];
+    const opponentTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(fc(5, false), fc(2), fc(1)),                     // [fd,2,1] — needs 3
+    ];
+    const drawnKapow = kapowCard();
+    const state = {
+      players: [
+        { hand: { triads: opponentTriads }, name: 'You' },
+        { hand: { triads: aiTriads }, name: 'AI' },
+      ],
+      drawPile: [fc(1)],
+      discardPile: [],
+      drawnCard: null,
+      phase: 'playing',
+    };
+    const action = aiDecideAction(state, drawnKapow);
+
+    // Should NOT complete T3 (index 2) — feeds opponent go-out.
+    // Any other action (place elsewhere, discard) is acceptable.
+    if (action.type === 'replace') {
+      expect(action.triadIndex).not.toBe(2);
+    }
+  });
+
+  test('R6T20 guard: completion is fine when opponent cannot use triad cards', () => {
+    // Same AI hand, but opponent needs a 10 (not a 3). Completing T3 is safe.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(fc(7, false), fc(3), fc(3)),                     // T3: [fd,3,3]
+      makeTriad(fc(7, false), fc(12, false), fc(5, false)),      // T4: [fd,fd,fd]
+    ];
+    const opponentTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(fc(5, false), fc(11), fc(12)),                   // [fd,11,12] — needs 10 or 13
+    ];
+    const drawnKapow = kapowCard();
+    const state = {
+      players: [
+        { hand: { triads: opponentTriads }, name: 'You' },
+        { hand: { triads: aiTriads }, name: 'AI' },
+      ],
+      drawPile: [fc(1)],
+      discardPile: [],
+      drawnCard: null,
+      phase: 'playing',
+    };
+    const action = aiDecideAction(state, drawnKapow);
+
+    // Completion is safe — opponent doesn't need a 3
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(2); // T3 — completes [K!,3,3]
+  });
+});

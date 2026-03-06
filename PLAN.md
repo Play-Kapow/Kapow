@@ -33,12 +33,12 @@ The living document. Updated in real-time throughout every session.
   - DEBUG lines like `T3 middle (11→3)` incorrectly showed actual fd values, causing false peeking concerns
   - AI provably doesn't peek: all-fd triads with different hidden values score identically per position
   - 1 no-peek regression test added
-- [x] Investigated: completion-discard safety (R6T20) — deferred
-  - Completing triad puts its cards on the discard pile; opponent can grab them
-  - R6T20: completing [3,3,K!] put a 3 on discard that opponent used to complete [3,2,1]
-  - Finding: completion bonus (106) dominates — even a -40 penalty leaves it 82 points above alternatives
-  - Triad completion is almost always the right call; penalty would rarely change the decision
-  - Filed as future edge case improvement
+- [x] AI: skip triad completion when it feeds opponent's go-out (R6T20)
+  - When opponent has 1 triad left and any card in our completing triad is their completion value, apply penalty = remaining hand points
+  - R6T20: completing [3,3,K!] put a 3 on discard, opponent completed [3,2,1] and went out, Kai stuck with T4[fd,fd,fd] ≈ 18pts
+  - Penalty (18) cancels completion bonus (106), making alternatives score higher
+  - Updated modular `ai.js` with matching go-out check in Strategy 1 completion flow
+  - 2 regression tests added (R6T20 + guard test)
 - [x] AI: discard-aware placement — avoid feeding opponent completion cards (R2T22)
   - Fix 1: matched-pair destruction offset in `aiScorePlacement()` — when new pair created, offset the penalty
   - Fix 2: discard safety swap bonus — reward placements that avoid discarding dangerous cards

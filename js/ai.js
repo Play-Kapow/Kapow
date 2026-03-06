@@ -177,6 +177,58 @@ export function aiDecideAction(gameState, drawnCard) {
         skipCompletion = true;
       }
     }
+    // Completion feeds opponent go-out: when the opponent has just 1 triad left,
+    // check if any revealed card in our completing triad is what they need to
+    // complete it. If so, they go out and we're stuck with all remaining cards.
+    if (!skipCompletion) {
+      const oppHand = gameState.players[0].hand;
+      let oppRemaining = 0;
+      let oppLastTriad = null;
+      for (let t = 0; t < oppHand.triads.length; t++) {
+        if (!oppHand.triads[t].isDiscarded) {
+          oppRemaining++;
+          oppLastTriad = oppHand.triads[t];
+        }
+      }
+      if (oppRemaining === 1 && oppLastTriad) {
+        // Find opponent's completion values (2-revealed triads only)
+        const positions = ['top', 'middle', 'bottom'];
+        let oppRevealed = 0;
+        const oppValues = [null, null, null];
+        for (let i = 0; i < 3; i++) {
+          const pc = oppLastTriad[positions[i]];
+          if (pc.length > 0 && pc[0].isRevealed) {
+            oppRevealed++;
+            oppValues[i] = getPositionValue(pc);
+          }
+        }
+        if (oppRevealed === 2) {
+          let emptyIdx = -1;
+          for (let i = 0; i < 3; i++) { if (oppValues[i] === null) { emptyIdx = i; break; } }
+          if (emptyIdx >= 0) {
+            const oppCompVals = [];
+            for (let v = 0; v <= 12; v++) {
+              const tv = oppValues.slice();
+              tv[emptyIdx] = v;
+              if (isSet(tv) || isAscendingRun(tv) || isDescendingRun(tv)) {
+                oppCompVals.push(v);
+              }
+            }
+            // Check if any revealed card in our completing triad feeds this
+            const cTriad = aiHand.triads[completionSpot.triadIndex];
+            for (const pos of positions) {
+              if (pos === completionSpot.position) continue;
+              const pc = cTriad[pos];
+              if (pc.length === 0 || !pc[0].isRevealed || pc[0].type !== 'fixed') continue;
+              if (oppCompVals.includes(pc[0].faceValue)) {
+                skipCompletion = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
     if (!skipCompletion) {
       return { type: 'replace', ...completionSpot };
     }
@@ -184,9 +236,12 @@ export function aiDecideAction(gameState, drawnCard) {
     // KAPOW flexibility: place in a partially-revealed triad (has at least one
     // revealed card for context) at a face-down position. KAPOW adapts to
     // whatever neighbors get revealed later.
+    // Skip the completing triad if completion was blocked due to feeding
+    // opponent go-out — placing KAPOW there would still complete it.
     let bestFlexSpot = null;
     let bestFdNeighbors = 0;
     for (let t = 0; t < aiHand.triads.length; t++) {
+      if (t === completionSpot.triadIndex) continue;
       const triad = aiHand.triads[t];
       if (triad.isDiscarded) continue;
       let hasRevealed = false;

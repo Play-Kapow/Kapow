@@ -2974,7 +2974,66 @@ function aiScorePlacement(hand, card, triadIndex, position) {
       swapBonus = 0;
     }
     score += swapBonus;
-  } else {
+  }
+
+  // COMPLETION FEEDS OPPONENT GO-OUT: When completing a triad, its cards go to
+  // the discard pile (line 879-893). If the opponent has just ONE triad left and
+  // any of these cards completes it, the opponent goes out — leaving Kai stuck
+  // with all remaining cards. The penalty is the estimated remaining hand points,
+  // which almost always dwarfs the completion bonus.
+  // E.g., R6T20: completing [3,3,K!] puts 3 on discard. Opponent [fd,2,1] grabs
+  // the 3, completes [3,2,1], goes out. Kai stuck with T4[fd,fd,fd] ≈ 18 points.
+  if (gameState && (placementCompletesTriad || placementCompletesViaKapowSwap)) {
+    var oppHand = gameState.players[0].hand;
+    var oppRemainingTriads = 0;
+    var oppLastTriad = null;
+    for (var ort = 0; ort < oppHand.triads.length; ort++) {
+      if (!oppHand.triads[ort].isDiscarded) {
+        oppRemainingTriads++;
+        oppLastTriad = oppHand.triads[ort];
+      }
+    }
+    if (oppRemainingTriads === 1 && oppLastTriad) {
+      var oppAnalysis = aiAnalyzeTriad(oppLastTriad);
+      if (oppAnalysis.isNearComplete && oppAnalysis.completionValues.length > 0) {
+        // Check if any revealed card in our completing triad (other than the
+        // placed card) is a completion value for the opponent's last triad
+        var feedsGoOut = false;
+        for (var cfp = 0; cfp < 3; cfp++) {
+          if (cfp === posIdx) continue;
+          var cfCards = triad[positions[cfp]];
+          if (cfCards.length === 0 || !cfCards[0].isRevealed) continue;
+          var cfVal = cfCards[0].type === 'fixed' ? cfCards[0].faceValue : -1;
+          if (cfVal < 0) continue;
+          for (var cfi = 0; cfi < oppAnalysis.completionValues.length; cfi++) {
+            if (cfVal === oppAnalysis.completionValues[cfi]) {
+              feedsGoOut = true;
+              break;
+            }
+          }
+          if (feedsGoOut) break;
+        }
+        if (feedsGoOut) {
+          // Penalty = estimated remaining hand points after completion
+          var remainingHandPts = 0;
+          for (var rht = 0; rht < hand.triads.length; rht++) {
+            if (rht === triadIndex) continue;
+            var rhTriad = hand.triads[rht];
+            if (rhTriad.isDiscarded) continue;
+            for (var rhp = 0; rhp < 3; rhp++) {
+              var rhCards = rhTriad[positions[rhp]];
+              if (rhCards.length > 0) {
+                remainingHandPts += rhCards[0].isRevealed ? getPositionValue(rhCards) : 6;
+              }
+            }
+          }
+          score -= remainingHandPts;
+        }
+      }
+    }
+  }
+
+  if (!placementCompletesTriad && !placementCompletesViaKapowSwap) {
     // Analyze the triad AFTER placement
     var analysis = aiAnalyzeTriad(triad);
 
