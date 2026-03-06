@@ -6,6 +6,8 @@
 
 ### 03-06-2026
 
+**v5 [Chuck]** UI: increase scorepad version font size (9px → 12px) for mobile readability.
+
 **v4 [Chuck]** AI: skip triad completion when it feeds opponent's go-out (R6T20).
 - When completing a triad, its cards go to the discard pile — if the opponent has just 1 triad left and any of those cards completes it, they go out and Kai is stuck with remaining hand points
 - In `aiScorePlacement()`, penalty = estimated remaining hand points (typically dwarfs the 100+ completion bonus when Kai has an untouched triad left)
