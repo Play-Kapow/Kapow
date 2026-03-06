@@ -6,6 +6,12 @@
 
 ### 03-06-2026
 
+**v3 [Chuck]** Fix debug log: face-down cards now show 'fd' instead of actual hidden values.
+- DEBUG placement lines like `T3 middle (11→3)` showed actual face-down values, causing false peeking concerns
+- AI provably doesn't peek: scoring uses `currentValue = 6` for all unrevealed cards (line 2528)
+- Proof: all-fd triads with different hidden values score identically per position in the game log
+- 1 no-peek regression test added (different hidden values → same decision)
+
 **v2 [Chuck]** AI: discard-aware placement — avoid feeding opponent completion cards (R2T22).
 - Two fixes in `aiScorePlacement()`:
   1. Matched-pair offset: when destroying a pair creates a NEW pair with equal potential, offset the penalty (e.g., [6,6,7]→[7,6,7]: old pair penalty zeroed by new 7,7 pair)

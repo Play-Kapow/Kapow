@@ -712,3 +712,34 @@ describe('Discard-aware placement (discard safety swap)', () => {
     expect(action.type).toBe('discard');
   });
 });
+
+describe('No-peek: face-down cards scored uniformly', () => {
+  test('different hidden values in face-down triads produce same decision', () => {
+    // Two identical hand structures with all-face-down triads that have
+    // different actual hidden values. The AI should make the same decision
+    // for both because it treats all face-down cards as value 6.
+    //
+    // Hand A: T1[fd(12),fd(12),fd(12)], T2[8,5,fd(0)]
+    // Hand B: T1[fd(0),fd(0),fd(0)], T2[8,5,fd(12)]
+    // Drawn: 2 (low card, should replace highest revealed = 8 in T2)
+    const handA = [
+      makeTriad(fc(12, false), fc(12, false), fc(12, false)),   // T1: all fd (hidden 12s)
+      makeTriad(fc(8), fc(5), fc(0, false)),                     // T2: [8,5,fd(0)]
+    ];
+    const handB = [
+      makeTriad(fc(0, false), fc(0, false), fc(0, false)),       // T1: all fd (hidden 0s)
+      makeTriad(fc(8), fc(5), fc(12, false)),                     // T2: [8,5,fd(12)]
+    ];
+    const drawn = fc(2);
+    const stateA = makeAiState(handA, { phase: 'playing' });
+    const stateB = makeAiState(handB, { phase: 'playing' });
+
+    const actionA = aiDecideAction(stateA, drawn);
+    const actionB = aiDecideAction(stateB, drawn);
+
+    // Both should make the same decision — face-down values don't matter
+    expect(actionA.type).toBe(actionB.type);
+    expect(actionA.triadIndex).toBe(actionB.triadIndex);
+    expect(actionA.position).toBe(actionB.position);
+  });
+});

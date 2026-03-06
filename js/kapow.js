@@ -1799,10 +1799,12 @@ function aiDecideAction(gameState, drawnCard) {
       // DEBUG: Log each placement candidate for analysis
       var drawnCardDesc = drawnCard.type === 'power' ? 'P' + drawnCard.faceValue :
                           (drawnCard.type === 'kapow' ? 'KAPOW' : drawnCard.faceValue);
-      var posCardsDesc = triad[positions[p]].length > 0 ?
-                         (triad[positions[p]][0].type === 'power' ? 'P' + triad[positions[p]][0].faceValue :
-                          triad[positions[p]][0].type === 'kapow' ? 'KAPOW' :
-                          triad[positions[p]][0].faceValue) : 'fd';
+      var posCard0 = triad[positions[p]].length > 0 ? triad[positions[p]][0] : null;
+      var posCardsDesc = !posCard0 ? 'empty' :
+                         !posCard0.isRevealed ? 'fd' :
+                         posCard0.type === 'power' ? 'P' + posCard0.faceValue :
+                         posCard0.type === 'kapow' ? 'KAPOW' :
+                         posCard0.faceValue;
       logAction(gameState, 1, 'DEBUG: T' + (t+1) + ' ' + positions[p] + ' (' + posCardsDesc + '→' + drawnCardDesc + ') score=' + ps);
     }
   }
