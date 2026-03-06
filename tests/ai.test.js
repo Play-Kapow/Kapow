@@ -567,3 +567,45 @@ describe('aiEvaluateDiscardSafety — completion penalty', () => {
     expect(safety).toBe(27);
   });
 });
+
+describe('aiDecideAction — KAPOW opportunity cost', () => {
+  test('R2T16: KAPOW goes to flexible triad, not low-value completion', () => {
+    // T1: discarded, T2: [0,9,0] all revealed, T3: [fd,4,fd], T4: [fd,fd,fd]
+    // KAPOW completes T2 as [0,K!,0] set — but saves only 9 points.
+    // With 5 face-down cards elsewhere (fdCount=5, threshold=15), 9 < 15.
+    // KAPOW should skip T2 completion and go to T3 (partially-revealed triad
+    // with face-down neighbors) for maximum wild card flexibility.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },          // T1: discarded
+      makeTriad(0, 9, 0),                                     // T2: [0,9,0]
+      makeTriad(fc(5, false), 4, fc(5, false)),               // T3: [fd,4,fd]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),    // T4: [fd,fd,fd]
+    ];
+    const drawnKapow = kapowCard();
+    const state = makeAiState(aiTriads, { phase: 'playing' });
+    const action = aiDecideAction(state, drawnKapow);
+
+    // Production AI: T3-middle wins on scoring (delta + spreading + KAPOW middle bonus).
+    // Modular AI: skips T2 completion (opportunity cost), places KAPOW in T3 (partially-
+    // revealed triad with most face-down neighbors) at a face-down position.
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(2); // T3, not T2 (index 1)
+  });
+
+  test('R2T16 guard: high-value KAPOW completion is not skipped', () => {
+    // Same structure but T2 has [10,9,10] — completing saves 29 points.
+    // fdCount=5, threshold=15. 29 > 15 → completion bonus applies.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(10, 9, 10),                                   // T2: [10,9,10]
+      makeTriad(fc(5, false), 4, fc(5, false)),
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),
+    ];
+    const drawnKapow = kapowCard();
+    const state = makeAiState(aiTriads, { phase: 'playing' });
+    const action = aiDecideAction(state, drawnKapow);
+
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(1); // T2 — high-value completion kept
+  });
+});

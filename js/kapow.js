@@ -2926,7 +2926,36 @@ function aiScorePlacement(hand, card, triadIndex, position) {
     // Undo face-down synergy penalty — it's irrelevant since the triad is being
     // discarded. The penalty was computed before we knew placement completes.
     score -= existingSynergyPenalty;
-    score += 100 + existingPoints;
+
+    // KAPOW opportunity cost: during playing phase, check whether KAPOW is worth
+    // more as a flexible wild card than completing this low-value triad.
+    // Count face-down cards in other non-discarded triads — more unknowns means
+    // more future value for KAPOW, so the bar for burning it on a completion rises.
+    var applyCompletionBonus = true;
+    if (card.type === 'kapow' && gameState && gameState.phase === 'playing') {
+      var currentSlotValue = isUnrevealed ? 6 : getPositionValue(triad[positions[posIdx]]);
+      var totalTriadPoints = existingPoints + currentSlotValue;
+      var fdCount = 0;
+      for (var ft = 0; ft < hand.triads.length; ft++) {
+        if (ft === triadIndex) continue;
+        var fTriad = hand.triads[ft];
+        if (fTriad.isDiscarded) continue;
+        for (var fp = 0; fp < 3; fp++) {
+          var fCards = fTriad[positions[fp]];
+          if (fCards.length > 0 && !fCards[0].isRevealed) {
+            fdCount++;
+          }
+        }
+      }
+      var savingsFloor = fdCount * 3;
+      if (totalTriadPoints < savingsFloor) {
+        applyCompletionBonus = false;
+      }
+    }
+
+    if (applyCompletionBonus) {
+      score += 100 + existingPoints;
+    }
   } else if (placementCompletesViaKapowSwap) {
     // One within-triad KAPOW swap after this placement would complete the triad.
     // Treat this almost like direct completion — slightly discounted because it

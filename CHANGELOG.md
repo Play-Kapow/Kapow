@@ -6,6 +6,15 @@
 
 ### 03-05-2026
 
+**v2 [Chuck]** AI: KAPOW opportunity cost — skip low-value triad completion when KAPOW has more flexibility value (R2T16).
+- In `aiScorePlacement()`, when KAPOW completes a triad, check total points saved vs a dynamic threshold (`fdCount * 3`)
+- More face-down cards elsewhere = higher bar for burning KAPOW on a cheap completion
+- Fixes R2T16: Kai placed KAPOW in T2 [0,K!,0] (saves 9 pts) instead of keeping it for T3 [fd,4,fd] (4 paths to completion)
+- High-value completions unaffected (e.g., [10,K!,10] saves 20+ pts, always above threshold)
+- Final turns excluded — only applies during `playing` phase
+- Updated modular `ai.js` with matching logic
+- 2 regression tests added
+
 **v1 [Chuck]** Fix final-turn hang when all triads auto-discard after reveal (R10T39).
 - After AI goes out, if the human player's remaining triads all auto-complete on reveal, the game prompted a draw with nowhere to place a card
 - `advanceToNextPlayer()` now checks for an empty hand after auto-reveal/discard and skips directly to scoring

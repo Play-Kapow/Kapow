@@ -148,7 +148,63 @@ export function aiDecideAction(gameState, drawnCard) {
   // Strategy 1: If drawn card completes a triad, place it
   const completionSpot = findTriadCompletionSpot(aiHand, drawnCard);
   if (completionSpot) {
-    return { type: 'replace', ...completionSpot };
+    // KAPOW opportunity cost: during playing phase, check whether KAPOW is worth
+    // more as a flexible wild card than completing this low-value triad.
+    let skipCompletion = false;
+    if (drawnCard.type === 'kapow' && gameState.phase === 'playing') {
+      const cTriad = aiHand.triads[completionSpot.triadIndex];
+      let totalTriadPoints = 0;
+      for (const pos of ['top', 'middle', 'bottom']) {
+        const posCards = cTriad[pos];
+        if (posCards.length > 0 && posCards[0].isRevealed) {
+          totalTriadPoints += getPositionValue(posCards);
+        } else {
+          totalTriadPoints += 6;
+        }
+      }
+      let fdCount = 0;
+      for (let t = 0; t < aiHand.triads.length; t++) {
+        if (t === completionSpot.triadIndex) continue;
+        const triad = aiHand.triads[t];
+        if (triad.isDiscarded) continue;
+        for (const pos of ['top', 'middle', 'bottom']) {
+          if (triad[pos].length > 0 && !triad[pos][0].isRevealed) {
+            fdCount++;
+          }
+        }
+      }
+      if (totalTriadPoints < fdCount * 3) {
+        skipCompletion = true;
+      }
+    }
+    if (!skipCompletion) {
+      return { type: 'replace', ...completionSpot };
+    }
+
+    // KAPOW flexibility: place in a partially-revealed triad (has at least one
+    // revealed card for context) at a face-down position. KAPOW adapts to
+    // whatever neighbors get revealed later.
+    let bestFlexSpot = null;
+    let bestFdNeighbors = 0;
+    for (let t = 0; t < aiHand.triads.length; t++) {
+      const triad = aiHand.triads[t];
+      if (triad.isDiscarded) continue;
+      let hasRevealed = false;
+      const fdPositions = [];
+      for (const pos of ['top', 'middle', 'bottom']) {
+        if (triad[pos].length > 0) {
+          if (triad[pos][0].isRevealed) hasRevealed = true;
+          else fdPositions.push({ triadIndex: t, position: pos });
+        }
+      }
+      if (hasRevealed && fdPositions.length > bestFdNeighbors) {
+        bestFdNeighbors = fdPositions.length;
+        bestFlexSpot = fdPositions[0];
+      }
+    }
+    if (bestFlexSpot) {
+      return { type: 'replace', ...bestFlexSpot };
+    }
   }
 
   // Strategy 2: If power card, consider building powerset

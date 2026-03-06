@@ -29,6 +29,12 @@ The living document. Updated in real-time throughout every session.
 ## Session Log (03-05-2026)
 
 ### Shipped
+- [x] AI: KAPOW opportunity cost — skip low-value triad completion when KAPOW has more flexibility value (R2T16)
+  - In `aiScorePlacement()`, when KAPOW completes a triad, check `totalTriadPoints < fdCount * 3` and skip completion bonus if too low
+  - Fixes: Kai placed KAPOW in T2 [0,K!,0] saving 9 pts instead of keeping flexibility for T3 [fd,4,fd] with 4 completion paths
+  - High-value completions and final turns unaffected
+  - Updated modular `ai.js` with matching logic + KAPOW flexibility placement strategy
+  - 2 regression tests added (low-value skip + high-value guard)
 - [x] Fix final-turn hang when all triads auto-discard after reveal (R10T39)
   - After AI goes out, human's remaining triads all auto-completed on reveal → empty hand → draw prompt with no valid placements → hang
   - `advanceToNextPlayer()` now detects empty hand after auto-discard and skips straight to `endRound()`
