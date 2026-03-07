@@ -298,8 +298,35 @@ export function aiDecideAction(gameState, drawnCard) {
     }
   }
 
-  // Strategy 4: If KAPOW! card, replace highest value position
+  // Strategy 4: If KAPOW! card, prefer seeding face-down slots, then replace highest
   if (drawnCard.type === 'kapow') {
+    // Prefer face-down position in a triad that already has revealed cards.
+    // KAPOW adapts to whatever neighbors get revealed later.
+    let bestSeedSpot = null;
+    let bestFdCount = 0;
+    for (let t = 0; t < aiHand.triads.length; t++) {
+      const triad = aiHand.triads[t];
+      if (triad.isDiscarded) continue;
+      let hasRevealed = false;
+      const fdPositions = [];
+      for (const pos of ['top', 'middle', 'bottom']) {
+        if (triad[pos].length > 0) {
+          if (triad[pos][0].isRevealed) hasRevealed = true;
+          else fdPositions.push({ triadIndex: t, position: pos });
+        }
+      }
+      if (hasRevealed && fdPositions.length > bestFdCount) {
+        // Skip triads where KAPOW would immediately complete (only 1 fd = 2 revealed).
+        // KAPOW completions are handled by Strategy 1 with go-out safety checks.
+        if (fdPositions.length === 1) continue;
+        bestFdCount = fdPositions.length;
+        bestSeedSpot = fdPositions[0];
+      }
+    }
+    if (bestSeedSpot) {
+      return { type: 'replace', ...bestSeedSpot };
+    }
+    // Fallback: replace highest value revealed position
     const highPos = findHighestValuePosition(aiHand);
     if (highPos && highPos.value >= 8) {
       return { type: 'replace', triadIndex: highPos.triadIndex, position: highPos.position };

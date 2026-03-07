@@ -4,6 +4,15 @@
 
 ## Version History
 
+### 03-07-2026
+
+**v1 [Chuck]** AI: fix KAPOW placement scoring — seed face-down slots, don't replace known cards (R4T12).
+- Fix 1: skip existingSynergyPenalty for KAPOW placements — KAPOW is wild (0-12), penalizing it for "no direct paths" with neighbors is always wrong
+- Fix 2: skip discard safety swap bonus for KAPOW draws — KAPOW's low safety (15) caused systematic bias toward replacing revealed cards
+- Updated modular `ai.js` Strategy 4: KAPOW prefers seeding face-down slots in triads with revealed neighbors, skips triads where it would immediately complete (handled by Strategy 1 with go-out safety), falls back to replacing highest value
+- Fixes R4T12: Kai placed KAPOW in T3-middle replacing a 9, should have seeded a face-down slot
+- 2 regression tests added (R4T12 scenario + guard with all-revealed triads)
+
 ### 03-06-2026
 
 **v6 [Chuck]** UI: show game version on opening screen below Leaderboard button.

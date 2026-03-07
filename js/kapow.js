@@ -2676,7 +2676,8 @@ function aiScorePlacement(hand, card, triadIndex, position) {
   // the existing revealed cards in this triad already have good synergy.
   // If so, only place a card that FITS with them — don't ruin a promising triad.
   var existingSynergyPenalty = 0;
-  if (isUnrevealed) {
+  if (isUnrevealed && card.type !== 'kapow') {
+    // KAPOW is wild (0-12) — it has synergy with every card, so skip this penalty.
     // Gather existing revealed values and their positions in this triad
     var existingRevealed = [];
     for (var ei = 0; ei < 3; ei++) {
@@ -3449,7 +3450,7 @@ function aiScorePlacement(hand, card, triadIndex, position) {
     // E.g., drawn 7 (safety 36, opponent needs 7) → place in T2, discard the
     // replaced 6 (safety ~58) instead. Cost is 1 point, but avoids the feed.
     var drawnCardSafety = aiEvaluateDiscardSafety(card, gameState);
-    if (drawnCardSafety < 40 && replacedSafety > drawnCardSafety + 10) {
+    if (card.type !== 'kapow' && drawnCardSafety < 40 && replacedSafety > drawnCardSafety + 10) {
       score += Math.min(Math.round((replacedSafety - drawnCardSafety) * 0.4), 15);
     }
   }

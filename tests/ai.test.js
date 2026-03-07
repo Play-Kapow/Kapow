@@ -815,3 +815,61 @@ describe('Completion feeds opponent go-out', () => {
     expect(action.triadIndex).toBe(2); // T3 — completes [K!,3,3]
   });
 });
+
+describe('KAPOW placement scoring', () => {
+  test('R4T12: KAPOW placed in face-down slot, not replacing only known card', () => {
+    // AI hand: T1 discarded, T2[fd, P1, fd], T3[fd, 9, fd], T4[fd, fd, fd]
+    // KAPOW should seed a face-down slot in T2 or T3 (both have revealed + fd),
+    // NOT replace the 9 in T3-middle (the only known card in that triad).
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },                   // T1: discarded
+      makeTriad(fc(3, false), powerCard(1, [-1, 1]), fc(7, false)),    // T2: [fd, P1, fd]
+      makeTriad(fc(5, false), fc(9), fc(8, false)),                    // T3: [fd, 9, fd]
+      makeTriad(fc(4, false), fc(6, false), fc(10, false)),            // T4: [fd, fd, fd]
+    ];
+    const opponentTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(fc(8), fc(2, false), fc(3, false)),                    // [8, fd, fd] — 9 doesn't complete
+      makeTriad(fc(1, false), fc(11, false), fc(7, false)),
+    ];
+    const drawnKapow = kapowCard();
+    const state = {
+      players: [
+        { hand: { triads: opponentTriads }, name: 'You' },
+        { hand: { triads: aiTriads }, name: 'AI' },
+      ],
+      drawPile: [fc(1)],
+      discardPile: [],
+      drawnCard: null,
+      phase: 'playing',
+    };
+    const action = aiDecideAction(state, drawnKapow);
+
+    // Strategy 4: KAPOW seeds a face-down slot in T2 or T3 (both have revealed + fd)
+    expect(action.type).toBe('replace');
+    // Must NOT replace T3-middle (the revealed 9)
+    const replacesT3Middle = action.triadIndex === 2 && action.position === 'middle';
+    expect(replacesT3Middle).toBe(false);
+    // Should go to T2 or T3 face-down slot (both have 2 fd positions with revealed neighbor)
+    expect([1, 2]).toContain(action.triadIndex);
+  });
+
+  test('R4T12 guard: KAPOW replaces high-value card when no face-down seeding available', () => {
+    // All triads fully revealed — KAPOW should fall back to replacing highest value
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },                   // T1: discarded
+      makeTriad(fc(8), powerCard(1, [-1, 1]), fc(11)),                 // T2: [8, P1, 11] all revealed
+      makeTriad(fc(10), fc(9), fc(7)),                                 // T3: [10, 9, 7] all revealed
+      { ...makeTriad(0, 0, 0), isDiscarded: true },                   // T4: discarded
+    ];
+    const drawnKapow = kapowCard();
+    const state = makeAiState(aiTriads, { drawnCard: null, phase: 'playing' });
+    const action = aiDecideAction(state, drawnKapow);
+
+    // No face-down seeding available — fallback to replacing highest value (11 in T2-bottom)
+    expect(action.type).toBe('replace');
+    // Should NOT discard the KAPOW
+    expect(action.type).not.toBe('discard');
+  });
+});

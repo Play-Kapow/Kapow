@@ -26,6 +26,18 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
+## Session Log (03-07-2026)
+
+### Shipped
+- [x] AI: fix KAPOW placement scoring — seed face-down slots, don't replace known cards (R4T12)
+  - Fix 1 (`kapow.js` line 2679): skip existingSynergyPenalty for KAPOW — wild card has synergy with everything
+  - Fix 2 (`kapow.js` line 3452): skip discard safety swap bonus for KAPOW — low safety (15) biased toward replacing revealed cards
+  - Fix 3 (`ai.js` Strategy 4): KAPOW seeds face-down slots in triads with revealed neighbors, skips 2-revealed triads (completion handled by Strategy 1 with go-out safety)
+  - Fixes R4T12: KAPOW placed in T3-middle (replacing the 9) instead of seeding a face-down slot
+  - 2 regression tests added (R4T12 + guard with all-revealed triads)
+
+---
+
 ## Session Log (03-06-2026)
 
 ### Shipped
