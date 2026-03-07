@@ -6,6 +6,10 @@
 
 ### 03-06-2026
 
+**v6 [Chuck]** UI: show game version on opening screen below Leaderboard button.
+- Dynamically populated from scorecard version (single source of truth for pre-commit hook)
+- Matches Leaderboard button font: 14px, DM Sans, 600 weight, 60% white
+
 **v5 [Chuck]** UI: increase scorepad version font size (9px → 12px) for mobile readability.
 
 **v4 [Chuck]** AI: skip triad completion when it feeds opponent's go-out (R6T20).

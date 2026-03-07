@@ -44,6 +44,9 @@ The living document. Updated in real-time throughout every session.
   - Fix 2: discard safety swap bonus — reward placements that avoid discarding dangerous cards
   - Fix 3: modular `ai.js` Strategy 6 — discard safety swap before default discard
   - 2 regression tests added (R2T22 scenario + guard test with safe drawn card)
+- [x] UI: show game version on opening screen below Leaderboard button
+  - Dynamically populated from scorecard-version (single source for pre-commit hook auto-bump)
+  - Matches Leaderboard button font: 14px, DM Sans 600, rgba(255,255,255,0.6)
 - [x] AI: low-value starter bonus — prefer seeding untouched triads over marginal improvements (R3T6)
   - In `aiScorePlacement()`, low cards (0-4) get +3 bonus when placed in untouched triads with 2+ untouched remaining
   - Root cause: 3-revealed path bonus (+16) made marginal improvements in developed triads beat the untouched triad bonus (+17)

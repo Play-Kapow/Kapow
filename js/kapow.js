@@ -4287,6 +4287,11 @@ function init() {
   document.getElementById('name-screen').classList.remove('hidden');
   document.getElementById('page-layout').classList.add('hidden');
 
+  // Populate name-screen version from scorecard (single source of truth for pre-commit hook)
+  var versionEl = document.querySelector('.name-screen-version');
+  var scorecardVersion = document.querySelector('.scorecard-version');
+  if (versionEl && scorecardVersion) versionEl.textContent = scorecardVersion.textContent;
+
   document.getElementById('btn-start-game').addEventListener('click', startGameWithName);
   document.getElementById('player-name-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') startGameWithName();
