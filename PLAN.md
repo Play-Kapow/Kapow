@@ -29,6 +29,13 @@ The living document. Updated in real-time throughout every session.
 ## Session Log (03-07-2026)
 
 ### Shipped
+- [x] AI: bury KAPOW after cross-triad swap completion (R2T13)
+  - After cross-triad K! swap completes a triad, K! was left at top → went to discard pile
+  - New burial logic in `aiStepCheckSwap()` moves K! from top to bottom/middle before discard
+  - Matches existing within-triad burial in `aiStepWithinTriadSwap()` (only ran after direct placement)
+  - Fixes R2T13: K! on discard let opponent complete T4 for 29 points (Kai only shed 1 point)
+  - Added `aiBuryKapowInCompletedTriad()` to modular `ai.js`
+  - 3 regression tests added (R2T13 + 2 guard tests)
 - [x] AI: detect KAPOW swap completions in discard safety (R5T27)
   - `aiEvaluateDiscardSafety()` now checks if a discarded fixed card is within ±2 of the fixed value in an opponent's [fd, F, K!] triad
   - Standard completionValues only covers F±1 (in-place); swap extends to F±2 (opponent rearranges after placement)

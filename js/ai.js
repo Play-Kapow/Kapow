@@ -442,6 +442,35 @@ export function aiConsiderKapowSwap(gameState) {
   return null;
 }
 
+/**
+ * After a cross-triad KAPOW swap completes a triad, check if KAPOW is at
+ * the top position and bury it deeper to keep it off the discard pile.
+ * Returns the burial position ('bottom' or 'middle') or null if no burial needed.
+ */
+export function aiBuryKapowInCompletedTriad(hand, triadIndex) {
+  const triad = hand.triads[triadIndex];
+  if (!triad || triad.isDiscarded || !isTriadComplete(triad)) return null;
+
+  const topCards = triad.top;
+  if (topCards.length === 0 || topCards[0].type !== 'kapow') return null;
+
+  // Try burial: bottom first (deepest), then middle
+  for (const targetPos of ['bottom', 'middle']) {
+    const kapowCards = triad.top;
+    const targetCards = triad[targetPos];
+    // Simulate
+    triad.top = targetCards;
+    triad[targetPos] = kapowCards;
+    const stillComplete = isTriadComplete(triad);
+    // Restore
+    triad[targetPos] = targetCards;
+    triad.top = kapowCards;
+    if (stillComplete) return targetPos;
+  }
+
+  return null;
+}
+
 // ---- Helper Functions ----
 
 function wouldHelpCompleteTriad(hand, card) {

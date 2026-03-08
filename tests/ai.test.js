@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import {
   aiFirstTurnReveals, aiDecideDraw, aiDecideAction,
   aiDecideRevealAfterDiscard, aiShouldGoOut, aiConsiderKapowSwap,
-  aiEvaluateDiscardSafety
+  aiEvaluateDiscardSafety, aiBuryKapowInCompletedTriad
 } from '../js/ai.js';
 
 // Helpers
@@ -930,5 +930,41 @@ describe('KAPOW placement scoring', () => {
     expect(action.type).toBe('replace');
     // Should NOT discard the KAPOW
     expect(action.type).not.toBe('discard');
+  });
+});
+
+describe('KAPOW burial after cross-triad swap completion', () => {
+  test('R2T13: buries KAPOW from top to bottom in completed triad', () => {
+    // R2T13: AI swapped K! from T2 to T1-top, completing T1=[K!, P1(1), 0].
+    // K! at top would land on discard pile — opponent grabs it next turn.
+    // Burial should move K! to bottom: [0, P1(1), K!(2)] is still complete
+    // as [0, 1, 2] ascending run. K! buried = opponent gets 0 instead.
+    const aiTriads = [
+      makeTriad(kapowCard(), powerCard(1, [-1, 1]), fc(0)),   // T1: [K!, P1, 0] — complete
+      makeTriad(fc(5, false), fc(6), fc(9)),                   // T2: [fd, 6, 9]
+    ];
+    const state = makeAiState(aiTriads);
+    const result = aiBuryKapowInCompletedTriad(state.players[1].hand, 0);
+    expect(result).toBe('bottom');
+  });
+
+  test('R2T13 guard: no burial when KAPOW is not at top', () => {
+    // K! at bottom — already buried, no action needed.
+    const aiTriads = [
+      makeTriad(fc(0), powerCard(1, [-1, 1]), kapowCard()),    // T1: [0, P1, K!] — K! at bottom
+    ];
+    const state = makeAiState(aiTriads);
+    const result = aiBuryKapowInCompletedTriad(state.players[1].hand, 0);
+    expect(result).toBeNull();
+  });
+
+  test('no burial when triad is not complete', () => {
+    // K! at top but triad is not complete — no burial.
+    const aiTriads = [
+      makeTriad(kapowCard(), fc(8), fc(3)),                    // T1: [K!, 8, 3] — not complete
+    ];
+    const state = makeAiState(aiTriads);
+    const result = aiBuryKapowInCompletedTriad(state.players[1].hand, 0);
+    expect(result).toBeNull();
   });
 });

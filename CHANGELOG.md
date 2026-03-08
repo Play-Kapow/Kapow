@@ -6,6 +6,13 @@
 
 ### 03-07-2026
 
+**v3 [Chuck]** AI: bury KAPOW after cross-triad swap completion (R2T13).
+- After a cross-triad KAPOW swap completes a triad, the K! was left at the top position — landing on the discard pile where the opponent could grab it
+- New burial logic in `aiStepCheckSwap()` moves K! from top to bottom (or middle) if the triad stays complete, matching the existing within-triad burial in `aiStepWithinTriadSwap()`
+- Fixes R2T13: K! swapped from T2 to T1-top completing [K!,P1,0] — K! went to discard pile, opponent grabbed it and completed their T4 for 29 points
+- Added `aiBuryKapowInCompletedTriad()` to modular `ai.js`
+- 3 regression tests added (R2T13 scenario + 2 guard tests)
+
 **v2 [Chuck]** AI: detect KAPOW swap completions in discard safety (R5T27).
 - When opponent has [fd, F, K!], standard completionValues only checks F±1 — misses that opponent can place a card, then swap KAPOW to a different position to complete a run
 - KAPOW swap expands the danger zone from F±1 to F±2: for F=3, standard={2,3,4}, swap adds {1,5}

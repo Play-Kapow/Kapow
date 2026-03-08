@@ -5650,6 +5650,37 @@ function aiStepCheckSwap() {
     aiMoveExplanation += '\n<p class="explain-step"><span class="explain-label">Swap:</span> Kai moved a KAPOW! card from ' + fromLabel + ' to ' + toLabel + '. KAPOW! cards are wild (worth 0\u201312) but count as 25 points if left unplayed. Moving them to better positions helps complete triads or reduce risk.</p>';
     gameState.aiHighlight = { type: 'place', triadIndex: swap.to.triadIndex, position: swap.to.position };
 
+    // After cross-triad swap, bury KAPOW at top of newly completed triads.
+    // Without this, KAPOW lands on the discard pile where opponent grabs it.
+    var swapAffected = [swap.to.triadIndex, swap.from.triadIndex];
+    for (var ati = 0; ati < swapAffected.length; ati++) {
+      var burialIdx = swapAffected[ati];
+      var burialTriad = aiHand.triads[burialIdx];
+      if (burialTriad.isDiscarded || !isTriadComplete(burialTriad)) continue;
+      var bTopCards = burialTriad.top;
+      if (bTopCards.length === 0 || bTopCards[0].type !== 'kapow') continue;
+      // Try burial: bottom first (deepest), then middle
+      var burialPositions = ['bottom', 'middle'];
+      for (var bp = 0; bp < burialPositions.length; bp++) {
+        var bPos = burialPositions[bp];
+        var bKapow = burialTriad.top;
+        var bTarget = burialTriad[bPos];
+        // Simulate
+        burialTriad.top = bTarget;
+        burialTriad[bPos] = bKapow;
+        var burialStillComplete = isTriadComplete(burialTriad);
+        // Restore
+        burialTriad[bPos] = bTarget;
+        burialTriad.top = bKapow;
+        if (burialStillComplete) {
+          swapKapowCard(aiHand, burialIdx, 'top', burialIdx, bPos);
+          logAction(gameState, 1, 'Buries KAPOW! within completed triad: top ↔ ' + bPos + ' (buried)');
+          aiMoveExplanation += '\n<p class="explain-step"><span class="explain-label">Burial:</span> Kai moves KAPOW! from top to ' + bPos + ' to keep it off the discard pile.</p>';
+          break;
+        }
+      }
+    }
+
     // Capture triad state before checking for completions
     var swapTriadsBefore = [];
     for (var stb = 0; stb < aiHand.triads.length; stb++) {
