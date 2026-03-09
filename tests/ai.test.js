@@ -968,3 +968,39 @@ describe('KAPOW burial after cross-triad swap completion', () => {
     expect(result).toBeNull();
   });
 });
+
+describe('Draw decision — safety swap bonus exclusion', () => {
+  test('R2T12: AI does NOT draw 9 from discard when safety swap bonus would inflate score', () => {
+    // AI hand: T1 discarded, T2[fd, 5, fd], T3[fd, fd, fd], T4[fd, fd, fd]
+    // Opponent has T3[fd, 10, K!] — so a 9 has somewhat low discard safety.
+    // Discard pile has a 9. The 9 replaces the 5 in T2 for +4 points (bad).
+    // Production bug: DISCARD SAFETY SWAP BONUS inflated score to +10.32, above
+    // the draw threshold. Fix: exclude safety swap bonus from draw evaluation.
+    // Modular AI: 9 is not ≤3 (low-value draw) and doesn't complete a triad,
+    // so aiDecideDraw returns 'deck' by default.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },             // T1: discarded
+      makeTriad(fc(3, false), fc(5), fc(7, false)),              // T2: [fd, 5, fd]
+      makeTriad(fc(4, false), fc(6, false), fc(8, false)),       // T3: [fd, fd, fd]
+      makeTriad(fc(2, false), fc(9, false), fc(11, false)),      // T4: [fd, fd, fd]
+    ];
+    const opponentTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(fc(5, false), fc(10), kapowCard(true, false)),   // [fd, 10, K!]
+      makeTriad(fc(1, false), fc(4, false), fc(7, false)),
+    ];
+    const state = {
+      players: [
+        { hand: { triads: opponentTriads }, name: 'You' },
+        { hand: { triads: aiTriads }, name: 'AI' },
+      ],
+      drawPile: [fc(1)],
+      discardPile: [fc(9)],
+      drawnCard: null,
+      phase: 'playing',
+    };
+    const decision = aiDecideDraw(state);
+    expect(decision).toBe('deck');
+  });
+});

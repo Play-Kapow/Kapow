@@ -4,6 +4,29 @@
 
 ## Version History
 
+### 03-09-2026
+
+**v1 [Chuck]** AI: exclude safety swap bonus from draw-from-discard decision (R2T12).
+- DISCARD SAFETY SWAP BONUS inflated placement scores during draw evaluation, causing AI to draw dangerous cards just because they could be placed (absorbing a score cost)
+- The bonus is correct for placement decisions (after draw) but wrong for draw decisions (should not motivate drawing)
+- Added `excludeSafetySwapBonus` option to `aiScorePlacement()`, passed from `aiEvaluateDrawFromDiscard()`
+- Fixes R2T12: Kai drew 9 from discard and placed in T2-middle replacing a 5 (+4 points)
+- 1 regression test added
+
+**v1 [Chuck]** AI: gate defensive burial explanation on triad completion potential.
+- "Buried when triad completes" explanation no longer shows for triads with zero completion paths
+- Prevents misleading explanation when card is placed in a triad like [fd, 9, fd] (no realistic completion)
+
+**v1 [Chuck]** UI: show completed triads before discarding on final-turn reveal.
+- When face-down cards are revealed and complete triads, they no longer vanish instantly
+- Human player sees completed triads highlighted green with a "Discard Completed Triad(s)" button
+- AI's reveal-completed triads animate out after a brief delay
+- Uses existing `triad-completing` CSS class and `animateNewlyDiscardedTriads` animation
+
+**v1 [Chuck]** UI: fix K! within-triad swap double animation.
+- Removed `runWithTriadAnimation` wrapper from within-triad swap handler
+- `completeWithinTriadSwap` already has proper animation logic; wrapping it caused competing animation chains
+
 ### 03-07-2026
 
 **v4 [Chuck]** UI: add trademark symbol and "Card Game" subtitle to launch screen and scorecard header.

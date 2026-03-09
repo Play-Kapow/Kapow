@@ -4,7 +4,7 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-## Current State (03-05-2026)
+## Current State (03-09-2026)
 
 **Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
 **Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
@@ -23,6 +23,23 @@ The living document. Updated in real-time throughout every session.
 - Dopamine hits: round win celebrations, streak badges, personal best detection
 - Leaderboard (top 25 lowest-score winners from telemetry API)
 - Game history saved to localStorage (last 50 games)
+
+---
+
+## Session Log (03-09-2026)
+
+### Shipped
+- [x] AI: exclude safety swap bonus from draw-from-discard decision (R2T12)
+  - DISCARD SAFETY SWAP BONUS inflated placement scores during draw evaluation
+  - Added `excludeSafetySwapBonus` option to `aiScorePlacement()`, passed from `aiEvaluateDrawFromDiscard()`
+  - 1 regression test added
+- [x] AI: gate defensive burial explanation on triad completion potential
+  - "Buried when triad completes" explanation no longer shows for triads with zero completion paths
+- [x] UI: show completed triads before discarding on final-turn reveal
+  - Human: "Discard Completed Triad(s)" button with green highlight
+  - AI: animated discard after brief delay
+- [x] UI: fix K! within-triad swap double animation
+  - Removed `runWithTriadAnimation` wrapper; `completeWithinTriadSwap` already handles animation
 
 ---
 
@@ -249,4 +266,4 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-*Last updated: 03-06-2026*
+*Last updated: 03-09-2026*
