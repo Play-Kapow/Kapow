@@ -6,6 +6,8 @@
 
 ### 03-10-2026
 
+**v2 [Chuck]** Deploy: fix GitHub Pages — switch from broken workflow mode back to branch deploy, disable stale deploy workflow.
+
 **v1 [Chuck]** AI: smarter forced go-out from triad completion — compare doubled score vs. stuck score (R4T25).
 - When completing a triad forces going out and `aiShouldGoOutWithScore` blocks it, the AI applied a blanket -200 penalty — killing the completion even when holding was worse
 - Now compares doubled go-out score vs. estimated stuck score (all remaining hand points if opponent goes out first)
