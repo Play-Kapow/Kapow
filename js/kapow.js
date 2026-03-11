@@ -1791,8 +1791,11 @@ function aiDecideAction(gameState, drawnCard) {
           }
           if (!remainingFullyRevealed) break;
         }
-        if (remainingFullyRevealed) {
+        if (remainingFullyRevealed && gameState.phase !== 'finalTurns') {
           // Completing this triad would trigger going out with remainingScore pts
+          // (Skip this check on final turns — the round ends regardless, and completing
+          // a high-value triad is always good. The -200 penalty was incorrectly blocking
+          // e.g. completing T4[P1,6,7]=14pt in favor of T2[0,0,P1]=1pt on final turn.)
           var goOutDecisionC = aiShouldGoOutWithScore(gameState, remainingScore);
           if (goOutDecisionC.shouldGoOut) {
             ps += 50;  // boost — go out!

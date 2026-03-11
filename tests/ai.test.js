@@ -1018,6 +1018,32 @@ describe('Draw decision — safety swap bonus exclusion', () => {
   });
 });
 
+describe('Final turn: best completion wins (R2T35)', () => {
+  test('R2T35: KAPOW placed in high-value T4 (saves 14pt) not low-value T2 (saves 1pt)', () => {
+    // AI hand: T2[0, 0, P1(standalone)] = 1pt, T4[P1(1), 6, 7] = 14pt
+    // Opponent went out (final turn). AI draws KAPOW from discard.
+    // KAPOW completes T2-bottom [0, 0, K!(0)] — saves only 1pt.
+    // KAPOW completes T4-top [K!(5), 6, 7] ascending run — saves 14pt.
+    // Production bug: -200 go-out penalty fires on T4-top (completing T4 triggers
+    //   going out with T2's 1pt remaining, which is doubled to 2 — but aiShouldGoOut
+    //   said no). Fix: skip go-out penalty on finalTurns phase.
+    // Modular AI: found first completion (T2-bottom) instead of best. Fix: scan all.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },          // T1: discarded
+      makeTriad(fc(0), fc(0), powerCard(1, [-1, 1])),         // T2: [0, 0, P1] = 1pt
+      { ...makeTriad(0, 0, 0), isDiscarded: true },          // T3: discarded
+      makeTriad(powerCard(1, [-1, 1]), fc(6), fc(7)),         // T4: [P1, 6, 7] = 14pt
+    ];
+    const drawnKapow = kapowCard();
+    const state = makeAiState(aiTriads, { phase: 'finalTurns' });
+    const action = aiDecideAction(state, drawnKapow);
+
+    // T4-top: KAPOW as 5 completes [5,6,7] ascending run, saves 14pt
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).toBe(3);  // T4, not T2 (index 1)
+  });
+});
+
 describe('Go-out forced by triad completion — opponent threat override', () => {
   test('R4T25: complete triad even when going out is forced, if opponent is about to go out', () => {
     // AI hand: T1[discarded], T2[fd,12,12], T3[discarded], T4[3,4,3] (all revealed)

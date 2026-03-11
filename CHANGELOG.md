@@ -4,6 +4,14 @@
 
 ## Version History
 
+### 03-11-2026
+
+**v1 [Chuck]** AI: fix final-turn KAPOW preferring low-value completion over high-value (R2T35).
+- On final turn with T2[0,0,P1]=1pt and T4[P1,6,7]=14pt, AI chose T2 over T4 for KAPOW placement
+- Bug 1 (kapow.js): go-out penalty (-200) fired on finalTurns phase — irrelevant since round ends regardless
+- Bug 2 (ai.js): findTriadCompletionSpot returned first match, not best; final-turn now scans all completions
+- 1 regression test added (R2T35)
+
 ### 03-10-2026
 
 **v8 [Eric]** Chore: trigger deploy workflow for per-branch preview URLs.

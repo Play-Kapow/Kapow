@@ -120,13 +120,28 @@ export function aiDecideAction(gameState, drawnCard) {
   if (isFinalTurn) {
     const cardValue = drawnCard.type === 'kapow' ? 25 : drawnCard.faceValue;
 
-    // Check if drawn card completes a triad — calculate actual points saved
-    const completionSpot = findTriadCompletionSpot(aiHand, drawnCard);
+    // Check if drawn card completes a triad — find the BEST completion (highest points saved).
+    // findTriadCompletionSpot returns only the first match; on final turn we must compare all.
+    let completionSpot = null;
     let completionSavings = 0;
-    if (completionSpot) {
-      const cTriad = aiHand.triads[completionSpot.triadIndex];
+    for (let t = 0; t < aiHand.triads.length; t++) {
+      const cTriad = aiHand.triads[t];
+      if (cTriad.isDiscarded) continue;
       for (const pos of ['top', 'middle', 'bottom']) {
-        if (cTriad[pos].length > 0) completionSavings += getPositionValue(cTriad[pos]);
+        const origCards = cTriad[pos];
+        cTriad[pos] = [{ ...drawnCard, isRevealed: true }];
+        const completes = isTriadComplete(cTriad);
+        cTriad[pos] = origCards;
+        if (completes) {
+          let savings = 0;
+          for (const p of ['top', 'middle', 'bottom']) {
+            if (cTriad[p].length > 0) savings += getPositionValue(cTriad[p]);
+          }
+          if (savings > completionSavings) {
+            completionSavings = savings;
+            completionSpot = { triadIndex: t, position: pos };
+          }
+        }
       }
     }
 
