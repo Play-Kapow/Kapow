@@ -6,6 +6,8 @@
 
 ### 03-10-2026
 
+**v5 [Eric]** Infra: add custom domain playkapow.com via GitHub Pages CNAME.
+
 **v4 [Chuck]** AI: fix KAPOW burial in double-KAPOW triads — skip KAPOW ↔ KAPOW no-op swap (R9T9).
 - [K!, 11, K!] burial tried swapping top K! ↔ bottom K! (no-op), leaving K! on top of discard pile
 - Now skips target positions that are also KAPOW, correctly swaps top K! ↔ middle 11
