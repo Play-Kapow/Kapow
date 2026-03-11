@@ -6,6 +6,11 @@
 
 ### 03-10-2026
 
+**v7 [Eric]** Infra: self-host fonts (Safari fix), add deploy workflow to main, update CONTRIBUTING.md for Play-Kapow org.
+- Self-hosted Bangers + DM Sans woff2 (35KB) — eliminates cross-origin font loading issues on Safari
+- Added `.github/workflows/deploy.yml` to main — enables GitHub Actions deploys + per-branch preview URLs
+- Updated CONTRIBUTING.md: new org URL, branching workflow, accurate test count, service worker status
+
 **v6 [Eric]** Infra: disable service worker caching, fix Safari font loading.
 
 **v5 [Eric]** Infra: add custom domain playkapow.com via GitHub Pages CNAME.

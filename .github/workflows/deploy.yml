@@ -1,0 +1,72 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Fetch all branch names
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: repo-meta
+
+      - name: Build site structure
+        run: |
+          mkdir -p _site
+
+          # Prod = main branch at root
+          cp -r main/* _site/
+          rm -rf _site/.git _site/.github _site/node_modules
+
+          # Get all remote branches (except main, HEAD)
+          cd repo-meta
+          BRANCHES=$(git branch -r | grep -v 'HEAD\|main' | sed 's|origin/||' | xargs)
+          cd ..
+
+          # Deploy each branch to its own subfolder
+          for BRANCH in $BRANCHES; do
+            SAFE_NAME=$(echo "$BRANCH" | sed 's|/|-|g')
+            echo "Deploying branch '$BRANCH' to /$SAFE_NAME/"
+            git clone --depth 1 --branch "$BRANCH" \
+              "https://github.com/${{ github.repository }}.git" "branch-$SAFE_NAME" 2>/dev/null || continue
+            mkdir -p "_site/$SAFE_NAME"
+            cp -r "branch-$SAFE_NAME"/* "_site/$SAFE_NAME/"
+            rm -rf "_site/$SAFE_NAME/.git" "_site/$SAFE_NAME/.github" "_site/$SAFE_NAME/node_modules"
+          done
+
+          echo "Site structure:"
+          ls -la _site/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

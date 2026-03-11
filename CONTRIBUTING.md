@@ -3,7 +3,7 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/cpheterson/Kapow.git
+git clone https://github.com/Play-Kapow/Kapow.git
 cd Kapow
 npm install                          # Install test runner (Vitest)
 git config core.hooksPath hooks      # Enable pre-commit hooks
@@ -12,13 +12,32 @@ python3 -m http.server 8000          # Serve locally at http://localhost:8000
 
 No build tools. No bundler. Edit → refresh → test → commit.
 
-## Deployment
+## Branching & Deployment
 
-**Hosted on GitHub Pages** — auto-deploys on push to `main`.
+**Hosted on GitHub Pages** with per-branch preview URLs.
 
-Live at: **https://cpheterson.github.io/Kapow/**
+| Branch | URL | Purpose |
+|--------|-----|---------|
+| `main` | **https://playkapow.com** | Production — the live site |
+| `beta` | https://play-kapow.github.io/Kapow/beta/ | Staging — preview before merging to main |
+| feature branches | https://play-kapow.github.io/Kapow/{branch}/ | Per-branch previews |
 
-There's no build step. GitHub Pages serves `index.html` directly. Push to `main` and it's live within ~60 seconds.
+### Workflow
+
+1. **Work on `beta`** — all development happens here
+2. **Test at the beta URL** — verify your changes look right
+3. **PR to `main`** — open a pull request when ready to go live
+4. **Merge = deploy** — push to `main` auto-deploys to playkapow.com within ~60 seconds
+
+```bash
+git checkout beta
+# make changes, test locally
+git add <files> && git commit -m "description"
+git push origin beta
+# verify at beta URL, then open PR to main
+```
+
+There's no build step. GitHub Pages serves `index.html` directly.
 
 ## How Things Work
 
@@ -44,7 +63,7 @@ These modules are **not loaded by the game** — `index.html` loads `kapow.js` d
 
 ### Tests
 
-133 tests across all 7 modules using [Vitest](https://vitest.dev/):
+168 tests across all 7 modules using [Vitest](https://vitest.dev/):
 
 ```bash
 npm test              # Run once
@@ -86,7 +105,7 @@ The production AI lives in `js/kapow.js` starting around line 1945 ("AI OPPONENT
 All CSS is in `css/styles.css`. Mobile-first with a `@media (min-width: 768px)` breakpoint for desktop.
 
 ### Service Worker
-`sw.js` caches assets for offline play. Bump the `CACHE_VERSION` constant when you want returning users to get a fresh version. This is **not** auto-bumped — do it manually when shipping significant changes.
+Service worker is currently disabled (self-unregisters on load). Was causing path issues with the custom domain. Can be re-enabled later when paths are standardized.
 
 ## Versioning
 
@@ -132,15 +151,15 @@ typeof gtag === 'function'  # should be true
 1. **Pre-commit hook not running?** Run `git config core.hooksPath hooks` — must be done once after cloning.
 2. **CHANGELOG.md not updated?** The hook blocks commits without a CHANGELOG entry. Add one, or skip with `--no-verify` for docs-only changes.
 3. **Version didn't bump?** The hook compares against `origin/main`. If your remote is out of date, run `git fetch origin` first.
-4. **Service worker caching old version?** Bump `CACHE_NAME` in `sw.js`. Users on old versions need a hard refresh (Cmd+Shift+R / Ctrl+Shift+R).
+4. **Seeing stale content?** Hard refresh (Cmd+Shift+R / Ctrl+Shift+R). Service worker is currently disabled.
 5. **Tests fail but game works?** The modular files (`js/deck.js`, etc.) may be out of sync with `kapow.js`. Update both when changing game logic.
 6. **Game logic changed in kapow.js but tests don't cover it?** The modular `js/ai.js` is a simplified subset (~300 lines) of the full AI (~1,600 lines). Some AI behaviors only exist in the production bundle.
 
 ## Repo History
 
-This is the canonical repo. Eric's fork ([epheterson/Kapow](https://github.com/epheterson/Kapow)) was merged into this repo on 02-28-2026 and is now archived.
+This is the canonical repo under the [Play-Kapow](https://github.com/Play-Kapow) org. Previously at `cpheterson/Kapow`, transferred 2026-03-10.
 
 | Contributor | Role |
 |-------------|------|
 | **Chuck** (cpheterson) | Game design, full AI engine, game logic |
-| **Eric** (epheterson) | Mobile UI, animations, sounds, tutorial, PWA, monetization, telemetry |
+| **Eric** (epheterson) | Mobile UI, animations, sounds, tutorial, PWA, monetization, telemetry, infra |
