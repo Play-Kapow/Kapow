@@ -6,6 +6,8 @@
 
 ### 03-10-2026
 
+**v6 [Eric]** Infra: disable service worker caching, fix Safari font loading.
+
 **v5 [Eric]** Infra: add custom domain playkapow.com via GitHub Pages CNAME.
 
 **v4 [Chuck]** AI: fix KAPOW burial in double-KAPOW triads — skip KAPOW ↔ KAPOW no-op swap (R9T9).
