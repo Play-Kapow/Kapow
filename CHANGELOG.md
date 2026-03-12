@@ -6,6 +6,24 @@
 
 ### 03-12-2026
 
+**v7 [Eric]** feat: enhance main.js to full game controller
+- Replaced skeleton main.js (~325 lines) with full game controller (~1450 lines) ported from kapow.js lines 4375-5858
+- Full init: name screen, version population, player name entry with Enter key support
+- Full bindGameEvents: all button listeners including export-log, understand-move, hint, mobile mirrors
+- Full refreshUI: AI pile highlights, draw/discard target classes, swap-phase message styling, turn counter, mobile score bar, AI commentary, button state management (end-turn/release-card/discard-triad modes with glow classes), pending reveal discard highlighting, round-end acknowledge flow
+- Full getClickablePositions: needsFirstReveal, within-triad KAPOW swap, cross-triad KAPOW swap (select + target), drawn card placement
+- Full _onCardClick: within-triad swap validation (completeness check), cross-triad KAPOW swap (select/deselect/execute), power card modal chains (power+power triple choice, modifier/replace, powerset-on-power, KAPOW restrictions), all wrapped in runWithTriadAnimation
+- Full playAITurn multi-step sequence: aiStepReveal (two cards with delays), aiStepDraw (banter, explanation building), aiStepPlace (powerset-on-power, add-powerset, replace, forced-discard-placement, triad completion animation), aiStepWithinTriadSwap (burial logic), aiStepCheckSwap (oscillation prevention via aiSwapHistory, post-swap burial, recursive swap checking)
+- Full onEndTurn: round-over continue, pending reveal discard animation, within-triad swap discard, release card mode, KAPOW swap end
+- Hint system: generateHint with aiScorePlacement for draw/place/swap phase advice
+- AI explanation modal: onUnderstandMove / onCloseExplain
+- Full showRoundEnd / showGameOver with winner determination, round-by-round tables, game history save, leaderboard prompt
+- Full game state functions (shadow gameState.js): startRoundFull, handleFirstTurnRevealFull, handleDrawFromDeckFull, handleDrawFromDiscardFull, handlePlaceCardFull, handleAddPowersetFull, handleCreatePowersetOnPower, handleDiscardFull, completeWithinTriadSwap with full logging, KAPOW swap checks, within-triad swap detection, discard ordering, banter triggers
+- Internal helpers: checkAndDiscardTriads, endTurn, endRound, advanceRoundFull, advanceToNextPlayer, checkForKapowSwapOrEndTurn, isHandFullyRevealed, hasRevealedKapow, canSwapKapow, cardDescription, playerTurnMessage
+- Imports from all new modules: aiExplanation.js, animation.js, logging.js, modals.js
+- Window globals for HTML onclick: _onCardClick, _onHint, _onUnderstandMove, _onCloseExplain, _resetTutorial
+- All 390 tests continue to pass
+
 **v6 [Eric]** feat(ui): enhance rendering to match full kapow.js implementation
 - Replaced renderCard (DOM element) with renderCardHTML (HTML string) matching kapow.js exactly
 - renderCardHTML: added powersetValue parameter, powerset label/total display, power-sign layout, fallback for unknown types
