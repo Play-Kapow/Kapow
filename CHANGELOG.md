@@ -6,6 +6,12 @@
 
 ### 03-12-2026
 
+**v9 [Eric]** refactor(sound): convert IIFE to ES module
+- Converted `js/sound.js` from `var KapowSounds = (function() { ... })();` IIFE to ES module with `export const KapowSounds`
+- Added import in `js/main.js` and `window.KapowSounds` assignment for HTML onclick handlers
+- Internal logic, lazy AudioContext init, and full API surface unchanged
+- All 390 tests pass
+
 **v8 [Eric]** feat(gameState): add _lastAction hooks for animation and logging
 - Added `_lastAction` metadata object to game state, populated by state-changing functions
 - `checkAndDiscardTriads` now returns array of newly discarded triad indices

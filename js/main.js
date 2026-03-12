@@ -50,6 +50,10 @@ import { generateAIBanter, clearAIBanter, buildAiExplanation } from './aiExplana
 import { animateNewlyDiscardedTriads, runWithTriadAnimation } from './animation.js';
 import { logAction, logSystem, logHandState, exportLog, saveGameToHistory } from './logging.js';
 import { showModal } from './modals.js';
+import { KapowSounds } from './sound.js';
+
+// Expose KapowSounds globally for HTML onclick handlers
+window.KapowSounds = KapowSounds;
 
 // ---- Module-level state (were IIFE closure variables) ----
 var gameState = null;
