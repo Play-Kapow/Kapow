@@ -52,6 +52,20 @@ import { logAction, logSystem, logHandState, exportLog, saveGameToHistory } from
 import { showModal } from './modals.js';
 import { KapowSounds } from './sound.js';
 import { KapowTelemetry, prepareFeedback, showFeedbackModal, hideFeedbackModal } from './telemetry.js';
+import {
+  trackEvent,
+  showHelpTab,
+  showBuyModal, hideBuyModal,
+  showLeaderboard, hideLeaderboard, hideLeaderboardSubmit,
+  fetchLeaderboard, renderLeaderboardRows, escapeHtml,
+  promptLeaderboardSubmit, confirmLeaderboardSubmit,
+  addGameNote, saveNote, renderGameNotes,
+  shareGameResults, fallbackCopy, showToast,
+  togglePrivacy,
+  closeSidebar,
+  initShell,
+  setGameState, getGameNotes, resetGameNotes
+} from './shell.js';
 
 // Expose KapowSounds globally for HTML onclick handlers
 window.KapowSounds = KapowSounds;
@@ -62,6 +76,29 @@ window.prepareFeedback = prepareFeedback;
 window.showFeedbackModal = showFeedbackModal;
 window.hideFeedbackModal = hideFeedbackModal;
 
+// Expose shell functions globally for HTML onclick/onsubmit handlers
+window.trackEvent = trackEvent;
+window.showHelpTab = showHelpTab;
+window.showBuyModal = showBuyModal;
+window.hideBuyModal = hideBuyModal;
+window.showLeaderboard = showLeaderboard;
+window.hideLeaderboard = hideLeaderboard;
+window.hideLeaderboardSubmit = hideLeaderboardSubmit;
+window.fetchLeaderboard = fetchLeaderboard;
+window.renderLeaderboardRows = renderLeaderboardRows;
+window.escapeHtml = escapeHtml;
+window.promptLeaderboardSubmit = promptLeaderboardSubmit;
+window.confirmLeaderboardSubmit = confirmLeaderboardSubmit;
+window.addGameNote = addGameNote;
+window.saveNote = saveNote;
+window.renderGameNotes = renderGameNotes;
+window.shareGameResults = shareGameResults;
+window.fallbackCopy = fallbackCopy;
+window.showToast = showToast;
+window.togglePrivacy = togglePrivacy;
+window.closeSidebar = closeSidebar;
+window.resetTutorial = resetTutorial;
+
 // ---- Module-level state (were IIFE closure variables) ----
 var gameState = null;
 var playerName = 'Player';
@@ -70,7 +107,6 @@ var triadAnimationInProgress = false;
 var roundEndAcknowledged = false;
 var aiMoveExplanation = '';
 var aiSwapHistory = [];
-var gameNotes = [];
 var AI_DELAY = 1500;
 
 // ---- Helper: card description ----
@@ -454,7 +490,7 @@ function advanceRoundFull(state) {
       generateAIBanter(state, 'player_wins_game');
     }
     // Auto-save the complete game log
-    exportLog(state, gameNotes, true);
+    exportLog(state, getGameNotes(), true);
     // Send telemetry
     if (typeof KapowTelemetry !== 'undefined') {
       KapowTelemetry.onGameComplete(state);
@@ -736,6 +772,9 @@ function completeWithinTriadSwap(state, completedTriadIndex, newKapowPosition) {
 // ========================================
 
 function init() {
+  // Initialize shell (service worker, global event listeners)
+  initShell();
+
   // Show name entry screen
   var nameScreen = document.getElementById('name-screen');
   var pageLayout = document.getElementById('page-layout');
@@ -777,6 +816,7 @@ function startGameWithName() {
   if (scNameEl) scNameEl.textContent = name;
 
   gameState = createGameState([name, 'AI']);
+  setGameState(gameState);
   logSystem(gameState, '=== New Game: ' + name + ' vs AI ===');
   if (typeof KapowTelemetry !== 'undefined') {
     KapowTelemetry.startTimer();
@@ -795,7 +835,7 @@ function bindGameEvents() {
   document.getElementById('draw-pile').addEventListener('click', onDrawFromDeck);
   document.getElementById('discard-pile').addEventListener('click', onDrawFromDiscard);
   document.getElementById('btn-end-turn').addEventListener('click', onEndTurn);
-  document.getElementById('btn-export-log').addEventListener('click', function() { exportLog(gameState, gameNotes); });
+  document.getElementById('btn-export-log').addEventListener('click', function() { exportLog(gameState, getGameNotes()); });
   document.getElementById('btn-understand-move').addEventListener('click', onUnderstandMove);
   document.getElementById('btn-close-explain').addEventListener('click', onCloseExplain);
   document.getElementById('btn-hint').addEventListener('click', onHint);
@@ -1323,12 +1363,13 @@ function onNewGame() {
 
   // Clear the log and notes for the new game
   try { localStorage.removeItem('kapow-log'); } catch(e) {}
-  if (typeof gameNotes !== 'undefined') { gameNotes.length = 0; }
+  resetGameNotes();
   var notesEl = document.getElementById('scorecard-notes');
   if (notesEl) notesEl.innerHTML = '';
 
   // Start a fresh game with the same player name
   gameState = createGameState([playerName, 'AI']);
+  setGameState(gameState);
   logSystem(gameState, '=== New Game: ' + playerName + ' vs AI ===');
   if (typeof KapowTelemetry !== 'undefined') {
     KapowTelemetry.startTimer();
@@ -1420,7 +1461,7 @@ function showGameOver() {
   screen.classList.remove('hidden');
 
   // Save game to history
-  saveGameToHistory(gameState, winnerIndex, gameNotes, typeof KapowTelemetry !== 'undefined' ? KapowTelemetry : null);
+  saveGameToHistory(gameState, winnerIndex, getGameNotes(), typeof KapowTelemetry !== 'undefined' ? KapowTelemetry : null);
 
   // Prompt leaderboard submit if player won
   if (winnerIndex === 0 && typeof promptLeaderboardSubmit === 'function') {

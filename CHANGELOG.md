@@ -6,6 +6,16 @@
 
 ### 03-12-2026
 
+**v11 [Eric]** refactor(html): extract inline JS to shell.js module
+- Created `js/shell.js` ES module with all 20 functions extracted from 3 inline `<script>` blocks in index.html
+- Extracted: `trackEvent`, `showHelpTab`, `showBuyModal`, `hideBuyModal`, `showLeaderboard`, `hideLeaderboard`, `hideLeaderboardSubmit`, `fetchLeaderboard`, `renderLeaderboardRows`, `escapeHtml`, `promptLeaderboardSubmit`, `confirmLeaderboardSubmit`, `addGameNote`, `saveNote`, `renderGameNotes`, `shareGameResults`, `fallbackCopy`, `showToast`, `togglePrivacy`, `closeSidebar`
+- Service worker registration and global event listeners moved to `initShell()` function
+- All functions assigned to `window.*` in main.js for HTML onclick/onsubmit handler compatibility
+- Removed 3 external `<script>` tags (sound.js, telemetry.js, kapow.js) and added single `<script type="module" src="js/main.js">`
+- GA4 gtag snippet remains in index.html (standard practice)
+- index.html reduced from 812 to 506 lines (pure markup + GA4)
+- All 390 tests pass
+
 **v10 [Eric]** refactor(telemetry): convert IIFE to ES module
 - Converted `js/telemetry.js` from `var KapowTelemetry = (function() { ... })();` IIFE to ES module with named exports
 - Exported 3 standalone functions (`prepareFeedback`, `showFeedbackModal`, `hideFeedbackModal`)
