@@ -6,6 +6,20 @@
 
 ### 03-12-2026
 
+**v6 [Eric]** feat(ui): enhance rendering to match full kapow.js implementation
+- Replaced renderCard (DOM element) with renderCardHTML (HTML string) matching kapow.js exactly
+- renderCardHTML: added powersetValue parameter, powerset label/total display, power-sign layout, fallback for unknown types
+- Added renderPowersetInfo: modifier details + effective value display (imports getPositionValue from hand.js)
+- Rewrote renderHand: positional params (isOpponent, clickablePositions, onClickAttr, highlight), opponent position reversal, position labels, discarded triad empty slots, highlight classes (ai-place, ai-reveal, kapow-selected), powerset value calculation, onclick attribute strings
+- Enhanced renderDiscardPile: added drawnCard/drawnFromDiscard params for drawn-from state tracking, power card face-row layout
+- Added renderDrawPile: draw pile state with drawn-highlight class
+- Added renderScorecard: sidebar with round-by-round breakdown, current/completed round highlighting, score totals
+- Enhanced showRoundEnd: round winner determination (player-won/kai-won/tied classes), signed score display
+- Enhanced showGameOver: for-loop iteration matching kapow.js style
+- Updated renderDrawnCard to use renderCardHTML instead of DOM element creation
+- Updated main.js: new renderHand positional params, renderDiscardPile drawn state params, added renderDrawPile/renderScorecard calls, window._onCardClick global handler
+- 65 new tests covering all rendering functions (390 total)
+
 **v5 [Eric]** feat(ui): add modal system module
 - Created modals.js with 1 function (~30 lines) from kapow.js
 - Functions: showModal

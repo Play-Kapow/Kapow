@@ -19,6 +19,8 @@ import {
   renderHand,
   renderDiscardPile,
   renderDrawnCard,
+  renderDrawPile,
+  renderScorecard,
   updateDrawPileCount,
   updateMessage,
   updateScoreboard,
@@ -72,9 +74,13 @@ function refreshUI() {
   renderAIHand();
 
   // Render piles
-  renderDiscardPile(gameState.discardPile);
+  renderDiscardPile(gameState.discardPile, gameState.drawnCard, gameState.drawnFromDiscard);
+  renderDrawPile(gameState);
   renderDrawnCard(gameState.drawnCard);
   updateDrawPileCount(gameState.drawPile.length);
+
+  // Scorecard sidebar
+  renderScorecard(gameState);
 
   // Update scoreboard
   updateScoreboard(gameState);
@@ -110,22 +116,21 @@ function renderPlayerHand() {
 
   const clickablePositions = getClickablePositions();
 
-  renderHand(hand, 'player-hand', {
-    isOpponent: false,
-    onCardClick: onPlayerCardClick,
-    clickablePositions
-  });
+  // Highlight the selected KAPOW card during swap phase
+  var playerHL = null;
+  if (gameState.selectedKapow) {
+    playerHL = { type: 'kapow-selected', triadIndex: gameState.selectedKapow.triadIndex, position: gameState.selectedKapow.position };
+  }
+
+  renderHand(hand, 'player-hand', false, clickablePositions, 'window._onCardClick', playerHL);
 }
 
 function renderAIHand() {
   const hand = gameState.players[1].hand;
   if (!hand) return;
 
-  renderHand(hand, 'ai-hand', {
-    isOpponent: true,
-    onCardClick: null,
-    clickablePositions: []
-  });
+  var aiHL = gameState.aiHighlight;
+  renderHand(hand, 'ai-hand', true, [], null, aiHL);
 }
 
 function getClickablePositions() {
@@ -311,6 +316,9 @@ function playAITurn() {
     }, 600);
   }
 }
+
+// ---- Global click handler for inline onclick attributes ----
+window._onCardClick = onPlayerCardClick;
 
 // ---- Start Game ----
 document.addEventListener('DOMContentLoaded', init);

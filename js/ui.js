@@ -2,154 +2,221 @@
 // KAPOW! - UI Rendering & Interaction
 // ========================================
 
+import { getPositionValue } from './hand.js';
+
 /**
- * Render a single card as an HTML element.
+ * Render a single card as an HTML string.
+ * Matches kapow.js renderCardHTML exactly.
  */
-export function renderCard(card, options = {}) {
-  const { faceDown = false, clickable = false, selected = false, stacked = false } = options;
-
-  const div = document.createElement('div');
-  div.classList.add('card');
-
-  if (stacked) div.classList.add('stacked');
-  if (selected) div.classList.add('selected');
-  if (clickable) div.classList.add('clickable');
+export function renderCardHTML(card, faceDown, clickable, powersetValue) {
+  var classes = 'card';
+  if (clickable) classes += ' clickable';
 
   if (faceDown || !card.isRevealed) {
-    // Card back
-    div.classList.add('card-back');
-    div.innerHTML = `
-      <div class="card-back-inner">
-        <span class="card-back-text">KAPOW!</span>
-      </div>
-    `;
-  } else if (card.type === 'fixed') {
-    div.classList.add('card-fixed');
-    div.innerHTML = `
-      <span class="card-type-label">Fixed</span>
-      <span class="card-value-center">${card.faceValue}</span>
-    `;
-  } else if (card.type === 'power') {
-    div.classList.add('card-power');
-    div.innerHTML = `
-      <div class="card-power-header">
-        <span class="modifier-negative">${card.modifiers[0]}</span>
-        <span class="card-type-label">Power</span>
-        <span class="modifier-positive">+${card.modifiers[1]}</span>
-      </div>
-      <span class="card-power-face-value">${card.faceValue}</span>
-    `;
-  } else if (card.type === 'kapow') {
-    div.classList.add('card-kapow');
-    if (card.isFrozen) div.classList.add('frozen');
-    div.innerHTML = `
-      <span class="kapow-text">KAPOW!</span>
-      ${card.isFrozen && card.assignedValue !== null
-        ? `<span class="kapow-value">= ${card.assignedValue}</span>`
-        : '<span class="kapow-value">Wild (0-12)</span>'}
-    `;
+    classes += ' card-back';
+    return '<div class="' + classes + '">' +
+      '<div class="card-back-inner"><span class="card-back-text">KAPOW!</span></div></div>';
   }
 
-  return div;
+  if (card.type === 'fixed') {
+    classes += ' card-fixed';
+    var hasPowerset = powersetValue !== undefined && powersetValue !== null;
+    var typeLabel = hasPowerset ? 'Powerset' : 'Fixed';
+    var html = '<div class="' + classes + (hasPowerset ? ' has-powerset' : '') + '">' +
+      '<span class="card-type-label">' + typeLabel + '</span>' +
+      '<span class="card-value-center">' + card.faceValue + '</span>';
+
+    if (hasPowerset) {
+      html += '<span class="powerset-total">' + powersetValue + '</span>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  if (card.type === 'power') {
+    classes += ' card-power';
+    var hasPowerset = powersetValue !== undefined && powersetValue !== null;
+    var html = '<div class="' + classes + (hasPowerset ? ' has-powerset' : '') + '">' +
+      '<div class="card-power-header">';
+
+    if (hasPowerset) {
+      html += '<span class="card-type-label">Powerset</span>';
+    } else {
+      html += '<span class="card-type-label">Power</span>';
+    }
+
+    html += '</div>' +
+      '<div class="card-power-face-row">' +
+      '<span class="power-sign power-sign-minus">&minus;</span>' +
+      '<span class="card-power-face-value">' + card.faceValue + '</span>' +
+      '<span class="power-sign power-sign-plus">+</span>' +
+      '</div>';
+
+    if (hasPowerset) {
+      html += '<span class="powerset-total">' + powersetValue + '</span>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  if (card.type === 'kapow') {
+    classes += ' card-kapow';
+    var valueText = 'Wild (0-12)';
+    return '<div class="' + classes + '">' +
+      '<span class="kapow-text">KAPOW!</span>' +
+      '<span class="kapow-value">' + valueText + '</span></div>';
+  }
+
+  return '<div class="' + classes + '">?</div>';
+}
+
+/**
+ * Render powerset info (modifier details + effective value) beneath a card stack.
+ * Matches kapow.js renderPowersetInfo exactly.
+ */
+export function renderPowersetInfo(positionCards) {
+  // Show the combined effective value and modifier details beneath the card
+  var effectiveValue = getPositionValue(positionCards);
+  var modifierText = '';
+  for (var i = 1; i < positionCards.length; i++) {
+    var mod = positionCards[i];
+    if (mod.type === 'power' && mod.activeModifier != null) {
+      modifierText += (mod.activeModifier >= 0 ? '+' : '') + mod.activeModifier;
+      if (i < positionCards.length - 1) modifierText += ', ';
+    }
+  }
+  return '<div class="powerset-info">' +
+    '<span class="powerset-modifier">' + modifierText + '</span>' +
+    '<span class="powerset-effective">' + effectiveValue + '</span>' +
+    '</div>';
 }
 
 /**
  * Render a player's hand into a container element.
+ * Matches kapow.js renderHand exactly.
  */
-export function renderHand(hand, containerId, options = {}) {
-  const { isOpponent = false, onCardClick = null, clickablePositions = [] } = options;
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
+export function renderHand(hand, containerId, isOpponent, clickablePositions, onClickAttr, highlight) {
+  var container = document.getElementById(containerId);
+  var html = '';
 
-  hand.triads.forEach((triad, tIndex) => {
-    const triadDiv = document.createElement('div');
-    triadDiv.classList.add('triad-column');
+  for (var t = 0; t < hand.triads.length; t++) {
+    var triad = hand.triads[t];
+
+    // Skip discarded triads - they are visibly removed from the hand
     if (triad.isDiscarded) {
-      triadDiv.classList.add('complete');
+      var discardedPositions = isOpponent ? ['bottom', 'middle', 'top'] : ['top', 'middle', 'bottom'];
+      var discardLabels = { top: 'Top', middle: 'Mid', bottom: 'Bot' };
+      html += '<div class="triad-column discarded-triad">';
+      html += '<div class="triad-label">Triad ' + (t + 1) + '</div>';
+      for (var dp = 0; dp < discardedPositions.length; dp++) {
+        html += '<div class="position-slot empty-slot"><span class="pos-label">' + discardLabels[discardedPositions[dp]] + '</span></div>';
+      }
+      html += '</div>';
+      continue;
     }
 
-    const label = document.createElement('div');
-    label.classList.add('triad-label');
-    label.textContent = triad.isDiscarded ? 'Discarded' : `Triad ${tIndex + 1}`;
-    triadDiv.appendChild(label);
+    html += '<div class="triad-column">';
+    html += '<div class="triad-label">Triad ' + (t + 1) + '</div>';
 
-    for (const pos of ['top', 'middle', 'bottom']) {
-      const posSlot = document.createElement('div');
-      posSlot.classList.add('position-slot');
+    // For the AI hand (opponent), reverse render order so "top" position (closest to
+    // center of table) appears at the bottom of the column, nearest the center strip.
+    // Both players see "top" = closest to center, matching physical card game layout.
+    var positions = isOpponent ? ['bottom', 'middle', 'top'] : ['top', 'middle', 'bottom'];
+    var posLabels = { top: 'Top', middle: 'Mid', bottom: 'Bot' };
+    for (var p = 0; p < positions.length; p++) {
+      var pos = positions[p];
+
+      // Check if this position should be highlighted (AI actions or KAPOW swap selection)
+      var hlClass = '';
+      if (highlight && highlight.triadIndex === t && highlight.position === pos) {
+        if (highlight.type === 'place') hlClass = ' ai-place-highlight';
+        else if (highlight.type === 'reveal') hlClass = ' ai-reveal-highlight';
+        else if (highlight.type === 'kapow-selected') hlClass = ' kapow-selected-highlight';
+      }
+      html += '<div class="position-slot' + hlClass + '">';
+      html += '<span class="pos-label">' + posLabels[pos] + '</span>';
 
       if (triad[pos].length > 0) {
-        const topCard = triad[pos][0];
-        const isClickable = clickablePositions.some(
-          cp => cp.triadIndex === tIndex && cp.position === pos
-        );
-
-        // Render stacked cards (powerset) bottom-up
-        for (let i = triad[pos].length - 1; i >= 0; i--) {
-          const cardEl = renderCard(triad[pos][i], {
-            faceDown: isOpponent && !triad[pos][i].isRevealed,
-            clickable: i === 0 && isClickable,
-            stacked: triad[pos].length > 1
-          });
-
-          if (i === 0 && onCardClick) {
-            cardEl.addEventListener('click', () => {
-              onCardClick(tIndex, pos);
-            });
+        var isClickable = false;
+        if (clickablePositions) {
+          for (var c = 0; c < clickablePositions.length; c++) {
+            if (clickablePositions[c].triadIndex === t && clickablePositions[c].position === pos) {
+              isClickable = true;
+              break;
+            }
           }
+        }
 
-          posSlot.appendChild(cardEl);
+        var card = triad[pos][0];
+        var faceDown = isOpponent && !card.isRevealed;
+        var hasPowerset = triad[pos].length > 1 && card.isRevealed;
+
+        // Calculate powerset value if it exists (to display on card)
+        var powersetValue = null;
+        if (hasPowerset) {
+          powersetValue = getPositionValue(triad[pos]);
+        }
+
+        // Wrap in clickable div if needed
+        if (isClickable && onClickAttr) {
+          html += '<div onclick="' + onClickAttr + '(' + t + ',\'' + pos + '\')">';
+          html += renderCardHTML(card, faceDown, true, powersetValue);
+          html += '</div>';
+        } else {
+          html += renderCardHTML(card, faceDown, false, powersetValue);
         }
       }
 
-      triadDiv.appendChild(posSlot);
+      html += '</div>';
     }
 
-    container.appendChild(triadDiv);
-  });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 /**
  * Render the discard pile top card.
+ * Matches kapow.js renderDiscardPile exactly.
  */
-export function renderDiscardPile(discardPile) {
-  const container = document.getElementById('discard-top');
+export function renderDiscardPile(discardPile, drawnCard, drawnFromDiscard) {
+  var container = document.getElementById('discard-top');
   if (!container) return;
 
-  // Reset to base state
   container.innerHTML = '';
   container.className = 'card';
 
-  if (discardPile.length === 0) {
+  // If the player just drew from discard, show that card still on top
+  var topCard = (drawnCard && drawnFromDiscard) ? drawnCard : discardPile[discardPile.length - 1];
+
+  if (!topCard) {
     container.classList.add('empty-pile');
     container.innerHTML = '<span>Empty</span>';
     return;
   }
 
-  // Render top card inline (keep the same element to preserve ID)
-  const topCard = discardPile[discardPile.length - 1];
-
   if (topCard.type === 'fixed') {
     container.classList.add('card-fixed');
-    container.innerHTML = `
-      <span class="card-type-label">Fixed</span>
-      <span class="card-value-center">${topCard.faceValue}</span>
-    `;
+    container.innerHTML =
+      '<span class="card-type-label">Fixed</span>' +
+      '<span class="card-value-center">' + topCard.faceValue + '</span>';
   } else if (topCard.type === 'power') {
     container.classList.add('card-power');
-    container.innerHTML = `
-      <div class="card-power-header">
-        <span class="modifier-negative">${topCard.modifiers[0]}</span>
-        <span class="card-type-label">Power</span>
-        <span class="modifier-positive">+${topCard.modifiers[1]}</span>
-      </div>
-      <span class="card-power-face-value">${topCard.faceValue}</span>
-    `;
+    container.innerHTML =
+      '<div class="card-power-header">' +
+      '<span class="card-type-label">Power</span></div>' +
+      '<div class="card-power-face-row">' +
+      '<span class="power-sign power-sign-minus">&minus;</span>' +
+      '<span class="card-power-face-value">' + topCard.faceValue + '</span>' +
+      '<span class="power-sign power-sign-plus">+</span></div>';
   } else if (topCard.type === 'kapow') {
     container.classList.add('card-kapow');
-    container.innerHTML = `
-      <span class="kapow-text">KAPOW!</span>
-      <span class="kapow-value">Wild (0-12)</span>
-    `;
+    container.innerHTML =
+      '<span class="kapow-text">KAPOW!</span>' +
+      '<span class="kapow-value">Wild (0-12)</span>';
   }
 }
 
@@ -157,8 +224,8 @@ export function renderDiscardPile(discardPile) {
  * Render the drawn card display.
  */
 export function renderDrawnCard(card) {
-  const area = document.getElementById('drawn-card-area');
-  const display = document.getElementById('drawn-card-display');
+  var area = document.getElementById('drawn-card-area');
+  var display = document.getElementById('drawn-card-display');
 
   if (!card) {
     area.classList.add('hidden');
@@ -167,15 +234,32 @@ export function renderDrawnCard(card) {
   }
 
   area.classList.remove('hidden');
-  display.innerHTML = '';
-  display.appendChild(renderCard(card));
+  display.innerHTML = renderCardHTML(card, false, false);
+}
+
+/**
+ * Render the draw pile state.
+ * Matches kapow.js renderDrawPile exactly.
+ */
+export function renderDrawPile(state) {
+  var container = document.getElementById('draw-top');
+  if (!container) return;
+
+  if (state.drawnCard && !state.drawnFromDiscard) {
+    // Show the drawn card face-up and highlighted on the draw pile
+    container.innerHTML = renderCardHTML(state.drawnCard, false, false);
+    container.classList.add('drawn-highlight');
+  } else {
+    container.innerHTML = '<div class="card card-back"><div class="card-back-inner"><span class="card-back-text">KAPOW!</span></div></div>';
+    container.classList.remove('drawn-highlight');
+  }
 }
 
 /**
  * Update the draw pile count display.
  */
 export function updateDrawPileCount(count) {
-  document.getElementById('draw-count').textContent = `(${count} cards)`;
+  document.getElementById('draw-count').textContent = '(' + count + ' cards)';
 }
 
 /**
@@ -191,47 +275,97 @@ export function updateMessage(message) {
 export function updateScoreboard(state) {
   document.getElementById('round-number').textContent = state.round;
   document.getElementById('player-score-display').textContent =
-    `${state.players[0].name}: ${state.players[0].totalScore}`;
+    state.players[0].name + ': ' + state.players[0].totalScore;
   document.getElementById('ai-score-display').textContent =
-    `${state.players[1].name}: ${state.players[1].totalScore}`;
+    state.players[1].name + ': ' + state.players[1].totalScore;
 }
 
 /**
  * Enable/disable action buttons.
  */
 export function updateButtons(buttons) {
-  for (const [id, enabled] of Object.entries(buttons)) {
-    const btn = document.getElementById(id);
-    if (btn) btn.disabled = !enabled;
+  for (var id in buttons) {
+    if (buttons.hasOwnProperty(id)) {
+      var btn = document.getElementById(id);
+      if (btn) btn.disabled = !buttons[id];
+    }
   }
 }
 
 /**
+ * Render the scorecard sidebar with round-by-round breakdown.
+ * Matches kapow.js renderScorecard exactly.
+ */
+export function renderScorecard(state) {
+  var tbody = document.getElementById('scorecard-body');
+  if (!tbody) return;
+  var rows = tbody.getElementsByTagName('tr');
+
+  for (var r = 0; r < rows.length; r++) {
+    var cells = rows[r].getElementsByTagName('td');
+    var roundNum = r + 1;
+
+    // Highlight current round
+    if (roundNum === state.round && state.phase !== 'gameOver') {
+      rows[r].className = 'current-round';
+    } else if (roundNum < state.round || state.phase === 'gameOver') {
+      rows[r].className = 'completed-round';
+    } else {
+      rows[r].className = '';
+    }
+
+    // Fill in scores
+    if (state.players[0].roundScores[r] != null) {
+      cells[1].textContent = state.players[0].roundScores[r];
+      cells[2].textContent = state.players[1].roundScores[r];
+    } else {
+      cells[1].textContent = '-';
+      cells[2].textContent = '-';
+    }
+  }
+
+  // Update totals
+  document.getElementById('sc-player-total').innerHTML = '<strong>' + state.players[0].totalScore + '</strong>';
+  document.getElementById('sc-ai-total').innerHTML = '<strong>' + state.players[1].totalScore + '</strong>';
+}
+
+/**
  * Show the round end screen.
+ * Matches kapow.js showRoundEnd exactly.
  */
 export function showRoundEnd(state) {
-  const screen = document.getElementById('round-end-screen');
-  const title = document.getElementById('round-end-title');
-  const scores = document.getElementById('round-scores');
+  var screen = document.getElementById('round-end-screen');
+  var title = document.getElementById('round-end-title');
+  var scores = document.getElementById('round-scores');
 
-  title.textContent = `Round ${state.round} Complete!`;
+  title.textContent = 'Round ' + state.round + ' Complete!';
 
-  let html = '<table style="margin: 0 auto; text-align: left;">';
-  state.players.forEach((player, i) => {
-    const roundScore = player.roundScores[player.roundScores.length - 1];
-    const doubled = state.firstOutPlayer === i && roundScore !== player.roundScores[player.roundScores.length - 1];
-    html += `<tr>
-      <td style="padding: 4px 12px; font-weight: bold;">${player.name}</td>
-      <td style="padding: 4px 12px;">Round: +${roundScore}</td>
-      <td style="padding: 4px 12px;">Total: ${player.totalScore}</td>
-    </tr>`;
-  });
+  // Determine round winner
+  var playerScore = state.players[0].roundScores[state.players[0].roundScores.length - 1];
+  var aiScore = state.players[1].roundScores[state.players[1].roundScores.length - 1];
+  var winnerLine = '';
+  if (playerScore < aiScore) {
+    winnerLine = '<div class="round-winner-line player-won">' + state.players[0].name + ' wins the round!</div>';
+  } else if (aiScore < playerScore) {
+    winnerLine = '<div class="round-winner-line kai-won">Kai wins the round!</div>';
+  } else {
+    winnerLine = '<div class="round-winner-line tied">It\'s a tie!</div>';
+  }
+
+  var html = winnerLine;
+  html += '<table style="margin: 0 auto; text-align: left;">';
+  for (var i = 0; i < state.players.length; i++) {
+    var player = state.players[i];
+    var roundScore = player.roundScores[player.roundScores.length - 1];
+    html += '<tr><td style="padding: 4px 12px; font-weight: bold;">' + player.name + '</td>' +
+      '<td style="padding: 4px 12px;">Round: ' + (roundScore >= 0 ? '+' : '') + roundScore + '</td>' +
+      '<td style="padding: 4px 12px;">Total: ' + player.totalScore + '</td></tr>';
+  }
   html += '</table>';
 
   if (state.firstOutPlayer !== null) {
-    html += `<p style="margin-top: 12px; font-size: 14px; opacity: 0.8;">
-      ${state.players[state.firstOutPlayer].name} went out first.
-    </p>`;
+    html += '<p style="margin-top: 12px; font-size: 14px; opacity: 0.8;">' +
+      state.players[state.firstOutPlayer].name + ' went out first.</p>';
   }
 
   scores.innerHTML = html;
@@ -247,43 +381,40 @@ export function hideRoundEnd() {
 
 /**
  * Show the game over screen.
+ * Matches kapow.js showGameOver exactly.
  */
 export function showGameOver(state) {
-  const screen = document.getElementById('game-over-screen');
-  const title = document.getElementById('game-over-title');
-  const scores = document.getElementById('final-scores');
+  var screen = document.getElementById('game-over-screen');
+  var title = document.getElementById('game-over-title');
+  var scores = document.getElementById('final-scores');
 
-  // Find winner
-  let winnerIndex = 0;
-  state.players.forEach((p, i) => {
-    if (p.totalScore < state.players[winnerIndex].totalScore) winnerIndex = i;
-  });
+  var winnerIndex = 0;
+  for (var i = 0; i < state.players.length; i++) {
+    if (state.players[i].totalScore < state.players[winnerIndex].totalScore) winnerIndex = i;
+  }
 
-  title.textContent = `${state.players[winnerIndex].name} Wins!`;
+  title.textContent = state.players[winnerIndex].name + ' Wins!';
 
-  let html = '<table style="margin: 0 auto; text-align: left;">';
-  state.players.forEach(player => {
-    html += `<tr>
-      <td style="padding: 4px 12px; font-weight: bold;">${player.name}</td>
-      <td style="padding: 4px 12px;">Final Score: ${player.totalScore}</td>
-    </tr>`;
-  });
+  var html = '<table style="margin: 0 auto; text-align: left;">';
+  for (var i = 0; i < state.players.length; i++) {
+    html += '<tr><td style="padding: 4px 12px; font-weight: bold;">' + state.players[i].name + '</td>' +
+      '<td style="padding: 4px 12px;">Final Score: ' + state.players[i].totalScore + '</td></tr>';
+  }
   html += '</table>';
 
   html += '<h3 style="margin-top: 16px;">Round-by-Round:</h3>';
   html += '<table style="margin: 0 auto; text-align: center; font-size: 14px;">';
   html += '<tr><th style="padding: 2px 8px;">Round</th>';
-  state.players.forEach(p => {
-    html += `<th style="padding: 2px 8px;">${p.name}</th>`;
-  });
+  for (var i = 0; i < state.players.length; i++) {
+    html += '<th style="padding: 2px 8px;">' + state.players[i].name + '</th>';
+  }
   html += '</tr>';
-
-  for (let r = 0; r < state.maxRounds; r++) {
-    html += `<tr><td style="padding: 2px 8px;">${r + 1}</td>`;
-    state.players.forEach(p => {
-      const score = p.roundScores[r] ?? '-';
-      html += `<td style="padding: 2px 8px;">${score}</td>`;
-    });
+  for (var r = 0; r < state.maxRounds; r++) {
+    html += '<tr><td style="padding: 2px 8px;">' + (r + 1) + '</td>';
+    for (var i = 0; i < state.players.length; i++) {
+      var score = state.players[i].roundScores[r] != null ? state.players[i].roundScores[r] : '-';
+      html += '<td style="padding: 2px 8px;">' + score + '</td>';
+    }
     html += '</tr>';
   }
   html += '</table>';
