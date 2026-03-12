@@ -17,25 +17,56 @@ function safeLogAction(state, playerIndex, text) {
 
 /**
  * AI decides which 2 cards to reveal on the first turn.
- * Strategy: reveal random positions (no info to make better choice).
+ * Strategy: spread across different triads, prefer middle positions.
+ * Ported faithfully from kapow.js aiFirstTurnReveals().
  */
 export function aiFirstTurnReveals(hand) {
-  const unrevealed = [];
-  for (let t = 0; t < hand.triads.length; t++) {
-    const triad = hand.triads[t];
+  // Strategic reveals: spread across different triads, prefer middle positions
+  var triadUnrevealed = {};  // triadIndex -> array of unrevealed positions
+  for (var t = 0; t < hand.triads.length; t++) {
+    var triad = hand.triads[t];
     if (triad.isDiscarded) continue;
-    for (const pos of ['top', 'middle', 'bottom']) {
-      if (triad[pos].length > 0 && !triad[pos][0].isRevealed) {
-        unrevealed.push({ triadIndex: t, position: pos });
+    triadUnrevealed[t] = [];
+    var positions = ['top', 'middle', 'bottom'];
+    for (var p = 0; p < positions.length; p++) {
+      if (triad[positions[p]].length > 0 && !triad[positions[p]][0].isRevealed) {
+        triadUnrevealed[t].push(positions[p]);
       }
     }
   }
 
-  // Pick 2 random unrevealed positions
-  const picks = [];
-  for (let i = 0; i < 2 && unrevealed.length > 0; i++) {
-    const idx = Math.floor(Math.random() * unrevealed.length);
-    picks.push(unrevealed.splice(idx, 1)[0]);
+  var picks = [];
+  var usedTriads = {};
+  var triadKeys = Object.keys(triadUnrevealed);
+
+  // Pick from two different triads if possible
+  for (var pick = 0; pick < 2; pick++) {
+    var bestTriad = -1;
+    var bestPos = null;
+
+    for (var k = 0; k < triadKeys.length; k++) {
+      var ti = parseInt(triadKeys[k]);
+      if (usedTriads[ti] && triadKeys.length > Object.keys(usedTriads).length) continue;
+      var positions = triadUnrevealed[ti];
+      if (positions.length === 0) continue;
+
+      // Prefer middle (participates in both ascending & descending runs)
+      var pos = positions.indexOf('middle') >= 0 ? 'middle' :
+                positions[Math.floor(Math.random() * positions.length)];
+
+      if (bestTriad === -1) {
+        bestTriad = ti;
+        bestPos = pos;
+      }
+    }
+
+    if (bestTriad >= 0 && bestPos) {
+      picks.push({ triadIndex: bestTriad, position: bestPos });
+      usedTriads[bestTriad] = true;
+      // Remove from available
+      var idx = triadUnrevealed[bestTriad].indexOf(bestPos);
+      if (idx >= 0) triadUnrevealed[bestTriad].splice(idx, 1);
+    }
   }
 
   return picks;
@@ -44,18 +75,19 @@ export function aiFirstTurnReveals(hand) {
 /**
  * AI decides whether to draw from deck or discard pile.
  * Ported faithfully from kapow.js aiEvaluateDrawFromDiscard().
- * Returns 'deck' or 'discard' string for backward compatibility.
+ * Returns { choice: 'deck'|'discard', reason: string } matching the original's
+ * closure-variable pattern (lastDrawReason) for AI explanation system.
  */
 export function aiDecideDraw(gameState) {
   var discardTop = gameState.discardPile.length > 0
     ? gameState.discardPile[gameState.discardPile.length - 1] : null;
-  if (!discardTop) return 'deck';
+  if (!discardTop) return { choice: 'deck', reason: 'empty discard pile' };
 
   var aiHand = gameState.players[1].hand;
 
   // Check if it completes a triad — always draw
   if (wouldHelpCompleteTriad(aiHand, discardTop)) {
-    return 'discard';
+    return { choice: 'discard', reason: 'completes a triad' };
   }
 
   // Score the best placement for this specific card
@@ -88,7 +120,7 @@ export function aiDecideDraw(gameState) {
     var simulatedGoOutScore = handEvalDraw.knownScore + drawnCardValue;
     var goOutCheck = aiShouldGoOutWithScore(gameState, simulatedGoOutScore);
     if (!goOutCheck.shouldGoOut) {
-      return 'deck';
+      return { choice: 'deck', reason: 'drawing would force going out with bad score (' + simulatedGoOutScore + ' pts)' };
     }
   }
 
@@ -121,22 +153,22 @@ export function aiDecideDraw(gameState) {
     var discardPlacementValue = discardTop.type === 'kapow' ? 25 :
       discardTop.type === 'power' ? 0 : discardTop.faceValue;
     if (discardPlacementValue <= 6) {
-      return 'discard';
+      return { choice: 'discard', reason: 'final turn — guaranteed improvement' };
     }
     // Discard value > 6: deck likely offers better improvement
   }
 
   // Draw if the best placement gives meaningful improvement (> threshold)
   if (bestPlacementScore >= 8) {
-    return 'discard';
+    return { choice: 'discard', reason: 'strong placement available' };
   }
 
   // Draw low-value cards that build toward runs/sets
   if (discardTop.type === 'fixed' && discardTop.faceValue <= 3 && bestPlacementScore >= 3) {
-    return 'discard';
+    return { choice: 'discard', reason: 'low card improves hand' };
   }
 
-  return 'deck';
+  return { choice: 'deck', reason: 'deck offers better odds' };
 }
 
 /**

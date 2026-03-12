@@ -6,6 +6,15 @@
 
 ### 03-12-2026
 
+**v18 [Eric]** fix: 5 behavioral regressions caught in deep code review
+- scoring: `applyFirstOutPenalty` uses `<=` — ties trigger doubling (original: `lowestOther <= firstOutScore`)
+- hand: `getPositionValue` returns 25 for ALL KAPOW cards (no frozen/unfrozen distinction in original)
+- hand: `swapKapowCard` allows frozen KAPOW swaps (original only checks `sourceCards.length === 0`)
+- ai: `aiDecideDraw` returns `{choice, reason}` for explanation propagation to `buildAiExplanation`
+- ai: `aiFirstTurnReveals` restored strategic spread-across-triads logic (was simplified to random)
+- main: `aiStepDraw` destructures draw result and passes reason to AI explanation system
+- Updated 12 tests to match corrected behavior (390/390 passing)
+
 **v17 [Eric]** fix(ai): port original aiDecideAction candidate-scoring system from kapow.js
 - Replaced simplified `aiDecideDraw`, `aiDecideAction`, `aiShouldGoOut` with faithful ports of the original kapow.js implementations (commit `8544965`)
 - `aiDecideAction`: scores ALL possible placements via `aiScorePlacement`, powerset-on-power opportunities, modifier opportunities, and discard safety; picks highest-scoring candidate

@@ -84,7 +84,9 @@ export function applyFirstOutPenalty(roundScores, firstOutIndex) {
   const otherScores = scores.filter((_, i) => i !== firstOutIndex);
   const lowestOther = Math.min(...otherScores);
 
-  if (lowestOther < firstOutScore) {
+  // First-out player is doubled unless they have the STRICTLY lowest score.
+  // A tie does NOT count as lowest — tied scores still get doubled.
+  if (lowestOther <= firstOutScore) {
     scores[firstOutIndex] = firstOutScore * 2;
   }
 

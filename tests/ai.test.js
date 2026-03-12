@@ -95,7 +95,7 @@ describe('aiDecideDraw', () => {
     const state = makeAiState(aiTriads, {
       discardPile: [fc(5)]
     });
-    expect(aiDecideDraw(state)).toBe('discard');
+    expect(aiDecideDraw(state).choice).toBe('discard');
   });
 
   test('takes low-value discard when AI has high-value revealed card', () => {
@@ -105,7 +105,7 @@ describe('aiDecideDraw', () => {
     const state = makeAiState(aiTriads, {
       discardPile: [fc(1)]
     });
-    expect(aiDecideDraw(state)).toBe('discard');
+    expect(aiDecideDraw(state).choice).toBe('discard');
   });
 
   test('draws from deck when discard is high value and unhelpful', () => {
@@ -115,13 +115,13 @@ describe('aiDecideDraw', () => {
     const state = makeAiState(aiTriads, {
       discardPile: [fc(11)]
     });
-    expect(aiDecideDraw(state)).toBe('deck');
+    expect(aiDecideDraw(state).choice).toBe('deck');
   });
 
   test('draws from deck when discard pile is empty', () => {
     const aiTriads = [makeTriad(3, 4, 7)];
     const state = makeAiState(aiTriads, { discardPile: [] });
-    expect(aiDecideDraw(state)).toBe('deck');
+    expect(aiDecideDraw(state).choice).toBe('deck');
   });
 });
 
@@ -502,7 +502,7 @@ describe('aiDecideDraw — final turn', () => {
       phase: 'finalTurns',
     });
     const decision = aiDecideDraw(state);
-    expect(decision).toBe('discard');
+    expect(decision.choice).toBe('discard');
   });
 
   test('R2T48: prefers deck over high-value discard on final turn', () => {
@@ -518,7 +518,7 @@ describe('aiDecideDraw — final turn', () => {
       phase: 'finalTurns',
     });
     const decision = aiDecideDraw(state);
-    expect(decision).toBe('deck');
+    expect(decision.choice).toBe('deck');
   });
 
   test('draws low-value card from discard on final turn to replace KAPOW', () => {
@@ -533,7 +533,7 @@ describe('aiDecideDraw — final turn', () => {
       phase: 'finalTurns',
     });
     const decision = aiDecideDraw(state);
-    expect(decision).toBe('discard');
+    expect(decision.choice).toBe('discard');
   });
 
   test('does not draw from discard on final turn when no improvement possible', () => {
@@ -546,7 +546,7 @@ describe('aiDecideDraw — final turn', () => {
       phase: 'finalTurns',
     });
     const decision = aiDecideDraw(state);
-    expect(decision).toBe('deck');
+    expect(decision.choice).toBe('deck');
   });
 });
 
@@ -1048,7 +1048,7 @@ describe('Draw decision — safety swap bonus exclusion', () => {
       round: 1, turnNumber: 10, actionLog: [],
     };
     const decision = aiDecideDraw(state);
-    expect(decision).toBe('deck');
+    expect(decision.choice).toBe('deck');
   });
 });
 

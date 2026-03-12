@@ -57,8 +57,8 @@ describe('getPositionValue', () => {
     expect(getPositionValue([kapowCard(true, false)])).toBe(25);
   });
 
-  test('returns assigned value for frozen KAPOW card', () => {
-    expect(getPositionValue([kapowCard(true, true, 5)])).toBe(5);
+  test('returns 25 for frozen KAPOW card (KAPOW always 25 per original)', () => {
+    expect(getPositionValue([kapowCard(true, true, 5)])).toBe(25);
   });
 
   test('applies power card modifier to fixed card (powerset)', () => {
@@ -159,18 +159,20 @@ describe('swapKapowCard', () => {
     expect(hand.triads[0].middle[0].type).toBe('kapow');
   });
 
-  test('does not swap frozen KAPOW card', () => {
+  test('swaps frozen KAPOW card (original allows all KAPOW swaps)', () => {
     const kCard = kapowCard(true, true, 5);
+    const fCard = fixedCard(10);
     const hand = {
       triads: [
-        { top: [kCard], middle: [fixedCard(10)], bottom: [fixedCard(3)], isDiscarded: false }
+        { top: [kCard], middle: [fCard], bottom: [fixedCard(3)], isDiscarded: false }
       ]
     };
 
     swapKapowCard(hand, 0, 'top', 0, 'middle');
-    // Should be unchanged
-    expect(hand.triads[0].top[0].type).toBe('kapow');
-    expect(hand.triads[0].middle[0].faceValue).toBe(10);
+    // Swap should succeed — original only checks sourceCards.length === 0
+    expect(hand.triads[0].top[0].type).toBe('fixed');
+    expect(hand.triads[0].top[0].faceValue).toBe(10);
+    expect(hand.triads[0].middle[0].type).toBe('kapow');
   });
 });
 

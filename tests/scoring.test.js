@@ -58,9 +58,9 @@ describe('applyFirstOutPenalty', () => {
     expect(result).toEqual([5, 10]);
   });
 
-  test('no doubling if first-out player ties for lowest', () => {
+  test('doubling if first-out player ties for lowest (tie is NOT strictly lowest)', () => {
     const result = applyFirstOutPenalty([10, 10], 0);
-    expect(result).toEqual([10, 10]);
+    expect(result).toEqual([20, 10]);
   });
 
   test('no doubling if first-out score is 0', () => {

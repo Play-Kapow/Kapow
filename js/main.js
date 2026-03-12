@@ -1856,7 +1856,9 @@ function aiStepReveal() {
 
 // Step 2b: Draw a card
 function aiStepDraw() {
-  var drawChoice = aiDecideDraw(gameState);
+  var drawResult = aiDecideDraw(gameState);
+  var drawChoice = drawResult.choice;
+  var lastDrawReason = drawResult.reason;
   var drewFrom = drawChoice === 'discard' ? 'discard' : 'deck';
 
   if (drawChoice === 'discard') {
@@ -1875,6 +1877,9 @@ function aiStepDraw() {
   var pileLabel = drewFrom === 'discard' ? 'discard pile' : 'draw pile';
   gameState.aiHighlight = { type: 'draw', pile: drewFrom };
   gameState.message = 'Kai draws ' + drawnDesc + ' from the ' + pileLabel + '.';
+  if (lastDrawReason) {
+    logAction(gameState, 1, 'Reason: ' + lastDrawReason);
+  }
 
   // AI Banter: comment on drawing from discard pile
   // Only taunt if opponent knowingly provided the card (not a face-down they didn't know about)
@@ -1894,7 +1899,7 @@ function aiStepDraw() {
 
   // Build the detailed explanation BEFORE the action modifies state
   var savedDrawnCard = gameState.drawnCard;
-  aiMoveExplanation = buildAiExplanation(gameState, savedDrawnCard, drewFrom, action) || '';
+  aiMoveExplanation = buildAiExplanation(gameState, savedDrawnCard, drewFrom, action, lastDrawReason) || '';
 
   // Step 3: Place or discard
   setTimeout(function() { aiStepPlace(action, drewFromDiscard, drawnDesc); }, AI_DELAY);
