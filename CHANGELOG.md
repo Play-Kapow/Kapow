@@ -6,6 +6,11 @@
 
 ### 03-12-2026
 
+**v5 [Eric]** feat(ui): add modal system module
+- Created modals.js with 1 function (~30 lines) from kapow.js
+- Functions: showModal
+- 12 new tests covering modal creation, button rendering, promise resolution (325 total)
+
 **v4 [Eric]** feat: add logging and game history module
 - Created logging.js with 6 functions (~115 lines) from kapow.js
 - Functions: logAction, logSystem, logHandState, exportLog, saveGameToHistory, getGameHistory
