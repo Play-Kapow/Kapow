@@ -6,6 +6,12 @@
 
 ### 03-12-2026
 
+**v2 [Eric]** feat(ai): add explanation and banter module
+- Created aiExplanation.js with 5 functions (~433 lines) from kapow.js
+- Functions: AI_BANTER, generateAIBanter, clearAIBanter, buildAiExplanation, generateTakeawayTip
+- Changed buildAiExplanation to accept lastDrawReason as parameter (was IIFE closure variable) and return string (was setting closure variable)
+- 31 new tests covering banter generation, explanation building, takeaway tips (258 total)
+
 **v1 [Eric]** feat(ai): port evaluation functions from kapow.js to ES module
 - Ported 17 AI functions (~1800 lines) from IIFE to ES module with exports
 - Functions: aiScorePlacement, aiAnalyzeTriad, aiEvaluateHand, aiEstimateOpponentScore, aiGetGameContext, aiAssessOpponentThreat, aiCountFutureCompletions, aiCountPowerModifierPaths, getTestRange, aiEvaluateCardSynergy, aiGetOpponentNeeds, aiGetTopDiscardValue, aiFindPowersetOpportunity, aiFindModifierOpportunity, aiFindBeneficialSwap, findSwappableKapowCards, findSwapTargets
