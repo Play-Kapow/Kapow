@@ -43,11 +43,11 @@ There's no build step. GitHub Pages serves `index.html` directly.
 
 ### ES Modules
 
-The game loads `js/main.js` as a `<script type="module">`, which imports all other modules:
+The game loads `js/kapow.js` as a `<script type="module">`, which imports all other modules:
 
 | Module | What It Does |
 |--------|-------------|
-| `js/main.js` | Entry point — game loop, events, AI orchestration |
+| `js/kapow.js` | Entry point — game loop, events, AI orchestration |
 | `js/gameState.js` | State machine: setup → firstTurn → playing → finalTurns → scoring → gameOver |
 | `js/ai.js` | All AI decisions + evaluation |
 | `js/aiExplanation.js` | Banter + "Understand Kai's Move" |
@@ -99,7 +99,7 @@ Without this, git won't find the pre-commit hook and commits will skip tests + v
 ## Making Changes
 
 ### Game Logic
-Edit the relevant ES module in `js/`. Core game logic lives in `deck.js`, `hand.js`, `triad.js`, `scoring.js`, `rules.js`, and `gameState.js`. The game loop and event handling live in `main.js`.
+Edit the relevant ES module in `js/`. Core game logic lives in `deck.js`, `hand.js`, `triad.js`, `scoring.js`, `rules.js`, and `gameState.js`. The game loop and event handling live in `kapow.js`.
 
 ### AI (Kai)
 The full AI engine lives in `js/ai.js` (~2,600 lines of strategic evaluation). Banter and the "Understand Kai's Move" modal are in `js/aiExplanation.js`.
@@ -156,7 +156,7 @@ typeof gtag === 'function'  # should be true
 3. **Version didn't bump?** The hook compares against `origin/main`. If your remote is out of date, run `git fetch origin` first.
 4. **Seeing stale content?** Hard refresh (Cmd+Shift+R / Ctrl+Shift+R). Service worker is currently disabled.
 5. **Tests fail but game works?** Check that you exported new functions and that imports are correct in the test file.
-6. **New function not accessible in the browser?** If it's called from HTML `onclick` handlers, it must be assigned to `window.*` in `main.js`.
+6. **New function not accessible in the browser?** If it's called from HTML `onclick` handlers, it must be assigned to `window.*` in `kapow.js`.
 
 ## Repo History
 

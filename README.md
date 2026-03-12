@@ -63,11 +63,11 @@ When all your cards are revealed or discarded, the round ends. All other players
 
 ## Architecture
 
-ES modules loaded via `<script type="module" src="js/main.js">`. No bundler, no build step.
+ES modules loaded via `<script type="module" src="js/kapow.js">`. No bundler, no build step.
 
 | Module | What It Does |
 |--------|-------------|
-| `main.js` | Entry point — game loop, events, AI orchestration |
+| `kapow.js` | Entry point — game loop, events, AI orchestration |
 | `gameState.js` | State machine: setup → firstTurn → playing → finalTurns → scoring → gameOver |
 | `ai.js` | Multi-layered heuristic evaluation with opponent modeling |
 | `aiExplanation.js` | 100+ banter messages + "Understand Kai's Move" |

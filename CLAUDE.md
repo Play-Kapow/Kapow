@@ -17,17 +17,17 @@ No build step. Edit -> refresh -> test -> commit.
 ## Commands
 
 ```bash
-npm test              # Run tests once (Vitest, 390 tests across 12 modules)
+npm test              # Run tests once (Vitest, 392 tests across 12 modules)
 npm run test:watch    # Watch mode
 ```
 
 ## Architecture
 
-The game uses ES modules loaded via `<script type="module" src="js/main.js">` in `index.html`. No bundler, no build step.
+The game uses ES modules loaded via `<script type="module" src="js/kapow.js">` in `index.html`. No bundler, no build step.
 
 | Module | Purpose |
 |--------|---------|
-| `js/main.js` | Entry point — game loop, events, AI orchestration |
+| `js/kapow.js` | Entry point — game loop, events, AI orchestration |
 | `js/gameState.js` | State machine, round management |
 | `js/ai.js` | All AI decisions + evaluation |
 | `js/aiExplanation.js` | Banter + "Understand Kai's Move" |

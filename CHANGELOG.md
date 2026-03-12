@@ -6,7 +6,22 @@
 
 ### 03-12-2026
 
-**v18 [Eric]** fix: 5 behavioral regressions caught in deep code review
+**v1 [Chuck]** AI: fix draw decision missing power card modifier opportunities when 1 fd card remains (R5T29).
+- AI had T3[fd,-2,P2(2)], discard was P2. Modifier on T3-bottom saves 2pts without touching fd.
+- Bug 1 (kapow.js): go-out check fired before modifier evaluation, assuming any placement reveals fd — false for modifier placements on already-revealed positions.
+- Bug 2 (ai.js): aiDecideDraw only checked modifier opportunities on finalTurns, not playing phase.
+- Fix: evaluate modifier improvements before go-out check; skip go-out block when modifier escape ≥ 2pt exists; add playing-phase modifier check to modular AI.
+- 2 regression tests added (R5T29 + guard)
+
+**v20 [Eric]** chore: merge beta, integrate Chuck's R5T29 fix, rename main.js → kapow.js
+- Integrated Chuck's modifier-before-go-out-check fix into full-port aiDecideDraw
+- Added modifier improvement `>= 2` early return for playing phase (matching kapow.js)
+- Fixed R5T29 guard test: original hand [fd(5),4,3] forms run with P1(fv=1) → replaced with [fd(5),10,11]
+- Renamed `main.js` → `kapow.js` — the entry point keeps the game's name
+- Updated index.html, CLAUDE.md, README.md, CONTRIBUTING.md, shell.js references
+- All 392 tests pass (390 existing + 2 from Chuck's R5T29)
+
+**v19 [Eric]** fix: 5 behavioral regressions caught in deep code review
 - scoring: `applyFirstOutPenalty` uses `<=` — ties trigger doubling (original: `lowestOther <= firstOutScore`)
 - hand: `getPositionValue` returns 25 for ALL KAPOW cards (no frozen/unfrozen distinction in original)
 - hand: `swapKapowCard` allows frozen KAPOW swaps (original only checks `sourceCards.length === 0`)
@@ -15,7 +30,7 @@
 - main: `aiStepDraw` destructures draw result and passes reason to AI explanation system
 - Updated 12 tests to match corrected behavior (390/390 passing)
 
-**v17 [Eric]** fix(ai): port original aiDecideAction candidate-scoring system from kapow.js
+**v18 [Eric]** fix(ai): port original aiDecideAction candidate-scoring system from kapow.js
 - Replaced simplified `aiDecideDraw`, `aiDecideAction`, `aiShouldGoOut` with faithful ports of the original kapow.js implementations (commit `8544965`)
 - `aiDecideAction`: scores ALL possible placements via `aiScorePlacement`, powerset-on-power opportunities, modifier opportunities, and discard safety; picks highest-scoring candidate
 - `aiDecideDraw` (from `aiEvaluateDrawFromDiscard`): scores discard pile card placement, checks go-out safety on last unrevealed, evaluates power card modifiers, applies final turn deck-preference logic
@@ -24,35 +39,35 @@
 - Updated 14 test assertions and setups to match original candidate-scoring behavior
 - All 390 tests pass
 
-**v16 [Eric]** fix(ai): pass gameState to aiScorePlacement in hint system and forced placement
+**v17 [Eric]** fix(ai): pass gameState to aiScorePlacement in hint system and forced placement
 - 3 callsites in main.js were calling `aiScorePlacement` without the `gameState` parameter
 - Without it, KAPOW strategic value, opponent threat, and final turn detection silently degraded
 - Removed unused `aiShouldGoOut` import
 
-**v15 [Eric]** fix(gameState): add missing state properties to createGameState
+**v16 [Eric]** fix(gameState): add missing state properties to createGameState
 - Added 10 missing properties: `actionLog`, `turnNumber`, `aiCommentary`, `lastDiscardKnown`, `drawnFromDiscard`, `aiHighlight`, `awaitingKapowSwap`, `selectedKapow`, `swappingWithinCompletedTriad`, `completedTriadIndex`
 - Fixed `dealerIndex` default (was 0, should be 1 per kapow.js)
 - Without these, game crashed on start: `Cannot read properties of undefined (reading 'push')` in logSystem
 
-**v14 [Eric]** docs: add JSDoc types to core game modules
+**v15 [Eric]** docs: add JSDoc types to core game modules
 - Added `@typedef` for `Card`, `Triad`, `Hand`, `Player`, `GameState`, `LastAction`, `Action` across deck.js, scoring.js, rules.js, gameState.js
 - Added `@param`/`@returns` to all exported functions in deck.js, hand.js, triad.js, scoring.js, rules.js, gameState.js
 - Type imports via `@typedef {import('./deck.js').Card} Card` pattern for cross-module references
 - Comments only — zero behavior changes, all 390 tests pass
 
-**v13 [Eric]** docs: update CLAUDE.md, README.md, CONTRIBUTING.md for ES module architecture
+**v14 [Eric]** docs: update CLAUDE.md, README.md, CONTRIBUTING.md for ES module architecture
 - Replaced "Production vs. Modular Split" section with unified 16-module architecture table
 - Removed Common Mistake #2 (dual maintenance of kapow.js and modular files)
 - Updated test count (390 tests across 12 modules), AI references, and analytics references
 - Updated CONTRIBUTING.md: removed IIFE bundle section, updated making-changes and gotchas
 - Updated README.md: replaced IIFE architecture table with ES module table
 
-**v12 [Eric]** chore: remove kapow.js IIFE (fully replaced by ES modules)
+**v13 [Eric]** chore: remove kapow.js IIFE (fully replaced by ES modules)
 - Deleted `js/kapow.js` (~5,400 lines) — no longer loaded by index.html since v11
 - All game logic now lives in 16 ES modules loaded via `js/main.js`
 - All 390 tests pass
 
-**v11 [Eric]** refactor(html): extract inline JS to shell.js module
+**v12 [Eric]** refactor(html): extract inline JS to shell.js module
 - Created `js/shell.js` ES module with all 20 functions extracted from 3 inline `<script>` blocks in index.html
 - Extracted: `trackEvent`, `showHelpTab`, `showBuyModal`, `hideBuyModal`, `showLeaderboard`, `hideLeaderboard`, `hideLeaderboardSubmit`, `fetchLeaderboard`, `renderLeaderboardRows`, `escapeHtml`, `promptLeaderboardSubmit`, `confirmLeaderboardSubmit`, `addGameNote`, `saveNote`, `renderGameNotes`, `shareGameResults`, `fallbackCopy`, `showToast`, `togglePrivacy`, `closeSidebar`
 - Service worker registration and global event listeners moved to `initShell()` function
@@ -62,20 +77,20 @@
 - index.html reduced from 812 to 506 lines (pure markup + GA4)
 - All 390 tests pass
 
-**v10 [Eric]** refactor(telemetry): convert IIFE to ES module
+**v11 [Eric]** refactor(telemetry): convert IIFE to ES module
 - Converted `js/telemetry.js` from `var KapowTelemetry = (function() { ... })();` IIFE to ES module with named exports
 - Exported 3 standalone functions (`prepareFeedback`, `showFeedbackModal`, `hideFeedbackModal`)
 - Added imports and `window.*` assignments in main.js for HTML onclick/onsubmit handlers
 - Zero internal logic changes — same API surface, same behavior
 - All 390 tests pass
 
-**v9 [Eric]** refactor(sound): convert IIFE to ES module
+**v10 [Eric]** refactor(sound): convert IIFE to ES module
 - Converted `js/sound.js` from `var KapowSounds = (function() { ... })();` IIFE to ES module with `export const KapowSounds`
 - Added import in `js/main.js` and `window.KapowSounds` assignment for HTML onclick handlers
 - Internal logic, lazy AudioContext init, and full API surface unchanged
 - All 390 tests pass
 
-**v8 [Eric]** feat(gameState): add _lastAction hooks for animation and logging
+**v9 [Eric]** feat(gameState): add _lastAction hooks for animation and logging
 - Added `_lastAction` metadata object to game state, populated by state-changing functions
 - `checkAndDiscardTriads` now returns array of newly discarded triad indices
 - `handlePlaceCard`, `handleRevealAfterDiscard`, `handleAddPowerset` populate `_lastAction` with discardedTriads, playerWentOut, and nested roundEnd data
@@ -86,7 +101,7 @@
 - gameState.js remains pure: zero UI/DOM imports
 - All 390 tests pass unchanged
 
-**v7 [Eric]** feat: enhance main.js to full game controller
+**v8 [Eric]** feat: enhance main.js to full game controller
 - Replaced skeleton main.js (~325 lines) with full game controller (~1450 lines) ported from kapow.js lines 4375-5858
 - Full init: name screen, version population, player name entry with Enter key support
 - Full bindGameEvents: all button listeners including export-log, understand-move, hint, mobile mirrors
@@ -104,7 +119,7 @@
 - Window globals for HTML onclick: _onCardClick, _onHint, _onUnderstandMove, _onCloseExplain, _resetTutorial
 - All 390 tests continue to pass
 
-**v6 [Eric]** feat(ui): enhance rendering to match full kapow.js implementation
+**v7 [Eric]** feat(ui): enhance rendering to match full kapow.js implementation
 - Replaced renderCard (DOM element) with renderCardHTML (HTML string) matching kapow.js exactly
 - renderCardHTML: added powersetValue parameter, powerset label/total display, power-sign layout, fallback for unknown types
 - Added renderPowersetInfo: modifier details + effective value display (imports getPositionValue from hand.js)
@@ -118,31 +133,31 @@
 - Updated main.js: new renderHand positional params, renderDiscardPile drawn state params, added renderDrawPile/renderScorecard calls, window._onCardClick global handler
 - 65 new tests covering all rendering functions (390 total)
 
-**v5 [Eric]** feat(ui): add modal system module
+**v6 [Eric]** feat(ui): add modal system module
 - Created modals.js with 1 function (~30 lines) from kapow.js
 - Functions: showModal
 - 12 new tests covering modal creation, button rendering, promise resolution (325 total)
 
-**v4 [Eric]** feat: add logging and game history module
+**v5 [Eric]** feat: add logging and game history module
 - Created logging.js with 6 functions (~115 lines) from kapow.js
 - Functions: logAction, logSystem, logHandState, exportLog, saveGameToHistory, getGameHistory
 - Changed exportLog to accept state/gameNotes as parameters (were IIFE closure variables)
 - Changed saveGameToHistory to accept gameNotes/KapowTelemetry as parameters (were IIFE closure variables)
 - 35 new tests covering log formatting, hand state snapshots, history save/load (313 total)
 
-**v3 [Eric]** feat(ui): add animation module
+**v4 [Eric]** feat(ui): add animation module
 - Created animation.js with 3 functions (~166 lines) from kapow.js
 - Functions: animateTriadDiscard, animateNewlyDiscardedTriads, runWithTriadAnimation
 - Added gameState, triadAnimationInProgress, refreshUI as parameters (were IIFE closure variables)
 - 20 new tests covering detection logic and orchestration (278 total)
 
-**v2 [Eric]** feat(ai): add explanation and banter module
+**v3 [Eric]** feat(ai): add explanation and banter module
 - Created aiExplanation.js with 5 functions (~433 lines) from kapow.js
 - Functions: AI_BANTER, generateAIBanter, clearAIBanter, buildAiExplanation, generateTakeawayTip
 - Changed buildAiExplanation to accept lastDrawReason as parameter (was IIFE closure variable) and return string (was setting closure variable)
 - 31 new tests covering banter generation, explanation building, takeaway tips (258 total)
 
-**v1 [Eric]** feat(ai): port evaluation functions from kapow.js to ES module
+**v2 [Eric]** feat(ai): port evaluation functions from kapow.js to ES module
 - Ported 17 AI functions (~1800 lines) from IIFE to ES module with exports
 - Functions: aiScorePlacement, aiAnalyzeTriad, aiEvaluateHand, aiEstimateOpponentScore, aiGetGameContext, aiAssessOpponentThreat, aiCountFutureCompletions, aiCountPowerModifierPaths, getTestRange, aiEvaluateCardSynergy, aiGetOpponentNeeds, aiGetTopDiscardValue, aiFindPowersetOpportunity, aiFindModifierOpportunity, aiFindBeneficialSwap, findSwappableKapowCards, findSwapTargets
 - Replaced simpler aiEvaluateDiscardSafety with full kapow.js version (uses aiAnalyzeTriad)

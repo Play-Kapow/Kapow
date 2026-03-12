@@ -10,7 +10,7 @@ import { KapowTelemetry } from './telemetry.js';
 var gameState = null;
 var gameNotes = [];
 
-// ---- State setters (called by main.js to keep in sync) ----
+// ---- State setters (called by kapow.js to keep in sync) ----
 export function setGameState(gs) { gameState = gs; }
 export function getGameNotes() { return gameNotes; }
 export function resetGameNotes() { gameNotes.length = 0; }
