@@ -6,6 +6,12 @@
 
 ### 03-12-2026
 
+**v2 [Eric]** chore: Cloudflare Pages hosting + beta badge subdomain detection
+- playkapow.com now served by Cloudflare Pages (private repo support, faster CDN)
+- Beta preview at beta.kapow-b1k.pages.dev (auto-deploys on push)
+- Badge detection updated to match CF Pages subdomain pattern (beta.*.pages.dev)
+- GitHub Pages kept as fallback at play-kapow.github.io/Kapow
+
 **v27 [Eric]** feat: replay import UI + leaderboard guard + repo private
 - Right-click Export button → modal with paste/drop/file-select to replay a game log
 - Replayed games set `isReplayGame` flag — excluded from leaderboard and game history

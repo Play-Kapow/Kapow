@@ -40,11 +40,14 @@
 
   <link rel="stylesheet" href="css/styles.css">
   <script>
-    // Detect branch from deploy path (e.g. /beta/ → "BETA")
+    // Detect branch from deploy path (/beta/) or CF Pages subdomain (beta.*.pages.dev)
     (function() {
+      var branch = null;
       var m = location.pathname.match(/^\/([a-z][\w-]*)\//i);
-      if (m && m[1].toLowerCase() !== 'index') {
-        var branch = m[1].toUpperCase();
+      if (m && m[1].toLowerCase() !== 'index') branch = m[1].toUpperCase();
+      var h = location.hostname.match(/^([a-z][\w-]*)\.[\w-]+\.pages\.dev$/i);
+      if (h) branch = h[1].toUpperCase();
+      if (branch) {
         document.addEventListener('DOMContentLoaded', function() {
           // Append to version string
           var ver = document.querySelector('.scorecard-version');
@@ -298,7 +301,7 @@
         <a href="#" class="scorecard-deck-link footer-buy" onclick="event.preventDefault();event.stopPropagation();showBuyModal()">Get the Card Game &rarr;</a>
       </div>
     </div>
-    <div class="scorecard-version">03-13-2026 v1</div>
+    <div class="scorecard-version">03-13-2026 v3</div>
     </div>
     <div id="ai-commentary"></div>
   </div>
