@@ -2,6 +2,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   animateTriadDiscard, animateNewlyDiscardedTriads, runWithTriadAnimation
 } from '../js/animation.js';
+import { controller, resetController } from '../js/controller.js';
 
 // Helper: create a minimal triad
 function makeTriad(discarded = false) {
@@ -25,6 +26,7 @@ function makeGameState(playerTriads, aiTriads) {
 // Stub global document so animateTriadDiscard's getElementById returns null
 // (simulating no DOM), which causes it to call callback immediately.
 beforeEach(() => {
+  resetController();
   globalThis.document = {
     getElementById: vi.fn(() => null)
   };
@@ -168,9 +170,8 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
     const gs = makeGameState();
     const handlerFn = vi.fn();
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     expect(handlerFn).toHaveBeenCalledTimes(1);
   });
@@ -179,12 +180,11 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
     const gs = makeGameState();
     const handlerFn = vi.fn(); // Does nothing, no triads change
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     expect(refreshUI).toHaveBeenCalledTimes(1);
-    expect(animFlag.value).toBe(false);
+    expect(controller.triadAnimationInProgress).toBe(false);
   });
 
   test('detects newly discarded triad when handlerFn changes state', () => {
@@ -194,27 +194,25 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
       gs.players[0].hand.triads[1].isDiscarded = true;
     });
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     expect(handlerFn).toHaveBeenCalledTimes(1);
     // Animation path: refreshUI for pre-animation render + post-animation render
     expect(refreshUI).toHaveBeenCalledTimes(2);
   });
 
-  test('sets and clears triadAnimationInProgress flag', () => {
+  test('sets and clears triadAnimationInProgress on controller', () => {
     const gs = makeGameState();
     const handlerFn = vi.fn(() => {
       gs.players[0].hand.triads[0].isDiscarded = true;
     });
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     // No DOM → animation completes immediately → flag returns to false
-    expect(animFlag.value).toBe(false);
+    expect(controller.triadAnimationInProgress).toBe(false);
   });
 
   test('temporarily undoes isDiscarded for refreshUI, then restores', () => {
@@ -228,9 +226,8 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
     const refreshUI = vi.fn(() => {
       statesDuringRefresh.push(triad.isDiscarded);
     });
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     // First refreshUI call: triad temporarily set to false (for visible render)
     expect(statesDuringRefresh[0]).toBe(false);
@@ -245,13 +242,12 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
       gs.players[0].hand.triads[3].isDiscarded = true;
     });
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     expect(handlerFn).toHaveBeenCalledTimes(1);
     expect(refreshUI).toHaveBeenCalledTimes(2);
-    expect(animFlag.value).toBe(false);
+    expect(controller.triadAnimationInProgress).toBe(false);
   });
 
   test('works for AI player (index 1)', () => {
@@ -260,9 +256,8 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
       gs.players[1].hand.triads[2].isDiscarded = true;
     });
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(1, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(1, handlerFn, gs, refreshUI);
 
     expect(handlerFn).toHaveBeenCalledTimes(1);
     expect(refreshUI).toHaveBeenCalledTimes(2);
@@ -273,12 +268,11 @@ describe('runWithTriadAnimation — detection and orchestration', () => {
     const gs = makeGameState(triads);
     const handlerFn = vi.fn(); // Does nothing more
     const refreshUI = vi.fn();
-    const animFlag = { value: false };
 
-    runWithTriadAnimation(0, handlerFn, gs, animFlag, refreshUI);
+    runWithTriadAnimation(0, handlerFn, gs, refreshUI);
 
     // No new triads discarded → simple refreshUI path
     expect(refreshUI).toHaveBeenCalledTimes(1);
-    expect(animFlag.value).toBe(false);
+    expect(controller.triadAnimationInProgress).toBe(false);
   });
 });

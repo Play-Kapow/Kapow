@@ -4,6 +4,8 @@
 // Ported from kapow.js lines 3972-4121.
 // Handles animated triad discard: cards disappearing one by one.
 
+import { controller as c } from './controller.js';
+
 // Animated triad discard: shows cards disappearing one by one (bottom → mid → top)
 // containerId: 'player-hand' or 'ai-hand'
 // triadIndex: which triad (0-3)
@@ -122,10 +124,10 @@ export function animateNewlyDiscardedTriads(triadsBefore, playerIndex, gameState
 // playerIndex: which player's triads to watch (0=human, 1=AI)
 // handlerFn: function to call that modifies state (e.g., handlePlaceCard)
 // gameState: the game state object
-// triadAnimationInProgress: object with .value boolean (mutable ref)
 // refreshUI: function to call to refresh the UI
+// Uses c.triadAnimationInProgress directly (shared singleton).
 // Used by _onCardClick for human player triad completion animations.
-export function runWithTriadAnimation(playerIndex, handlerFn, gameState, triadAnimationInProgress, refreshUI) {
+export function runWithTriadAnimation(playerIndex, handlerFn, gameState, refreshUI) {
   var hand = gameState.players[playerIndex].hand;
   var triadsBefore = [];
   for (var t = 0; t < hand.triads.length; t++) {
@@ -145,7 +147,7 @@ export function runWithTriadAnimation(playerIndex, handlerFn, gameState, triadAn
 
   if (newlyDiscarded.length > 0) {
     // Block AI turn start during animation
-    triadAnimationInProgress.value = true;
+    c.triadAnimationInProgress = true;
     // Temporarily undo isDiscarded so refreshUI renders cards still visible
     for (var u = 0; u < newlyDiscarded.length; u++) {
       hand.triads[newlyDiscarded[u]].isDiscarded = false;
@@ -157,7 +159,7 @@ export function runWithTriadAnimation(playerIndex, handlerFn, gameState, triadAn
     }
     // Animate cards disappearing, then do final refresh
     animateNewlyDiscardedTriads(triadsBefore, playerIndex, gameState, function() {
-      triadAnimationInProgress.value = false;
+      c.triadAnimationInProgress = false;
       refreshUI();
     });
   } else {
