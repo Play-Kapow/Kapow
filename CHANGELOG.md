@@ -6,7 +6,7 @@
 
 ### 03-13-2026
 
-**v3 [Eric]** refactor: centralized controller state
+**v4 [Eric]** refactor: centralized controller state
 - New `controller.js` — single source of truth for all mutable controller flags
 - Eliminates primitive-by-value copy bug class (the root cause of T18 lockup)
 - `triadAnimationInProgress` no longer needs `{value: bool}` wrapper — plain boolean on shared object

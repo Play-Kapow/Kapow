@@ -47,7 +47,7 @@ import {
 
 import { generateAIBanter, clearAIBanter, buildAiExplanation } from './aiExplanation.js';
 import { animateNewlyDiscardedTriads, runWithTriadAnimation } from './animation.js';
-import { controller as c, resetController } from './c.js';
+import { controller as c, resetController } from './controller.js';
 import { logAction, logSystem, logHandState, exportLog, saveGameToHistory } from './logging.js';
 import { replayFromLog } from './replay.js';
 import { showModal } from './modals.js';
