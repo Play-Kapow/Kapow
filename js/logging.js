@@ -69,8 +69,11 @@ export function exportLog(state, gameNotes, silent) {
     if (!silent && typeof showToast === 'function') showToast('No log entries to export.');
     return;
   }
+  var versionEl = document.querySelector('.scorecard-version');
+  var version = versionEl ? versionEl.textContent.trim() : 'unknown';
   var header = 'KAPOW! Game Log\n';
   header += 'Player: ' + state.players[0].name + ' vs AI\n';
+  header += 'Version: ' + version + '\n';
   header += 'Date: ' + new Date().toLocaleString() + '\n';
   header += '================================\n\n';
   var logText = header + state.actionLog.join('\n');

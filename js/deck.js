@@ -28,6 +28,13 @@
  */
 
 let nextCardId = 0;
+let _riggedDeck = null;
+
+/**
+ * Set a pre-determined deck for replay. Next call to shuffle() returns this instead.
+ * @param {Card[]|null} deck
+ */
+export function setRiggedDeck(deck) { _riggedDeck = deck; }
 
 /**
  * Create a single card object.
@@ -113,6 +120,11 @@ export function createDeck() {
  * @returns {Card[]} New shuffled array (does not mutate input)
  */
 export function shuffle(cards) {
+  if (_riggedDeck) {
+    const rigged = _riggedDeck;
+    _riggedDeck = null;
+    return rigged;
+  }
   const shuffled = [...cards];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

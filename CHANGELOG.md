@@ -6,6 +6,14 @@
 
 ### 03-12-2026
 
+**v24 [Eric]** feat: game log replay system + version tag in exported logs
+- New `js/replay.js`: parses exported game logs, reconstructs exact deck order, replays human moves at configurable speed
+- `deck.js`: added `setRiggedDeck()` to inject pre-determined deck for replay
+- `logging.js`: exported logs now include game version header
+- `kapow.js`: wired replay interface (`window._replayFromLog`, `_getReplayState`, `_replayAction`, `_setReplaySpeed`)
+- Replay reconstructs deck from: reveals (dealt cards), draw pile tracking, discard trail analysis (turn boundary markers), remaining card pool filling
+- Playwright test scripts: `test-replay.mjs` (log replay to specific turn), `test-lockup.mjs` (automated lockup detection)
+
 **v22 [Eric]** fix: triadAnimationInProgress ref leak causing AI turn lockup
 - Module-level `triadAnimationInProgress` was a primitive boolean, but `runWithTriadAnimation` expected a mutable ref object `{value: bool}`
 - Each call site created a disposable local ref copy — the async animation callback cleared `ref.value` but the module-level primitive was never updated
