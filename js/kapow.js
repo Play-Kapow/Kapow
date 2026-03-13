@@ -108,6 +108,7 @@ var roundEndAcknowledged = false;
 var aiMoveExplanation = '';
 var aiSwapHistory = [];
 var AI_DELAY = 1500;
+var isReplayGame = false; // Set true during replay — blocks leaderboard/history
 
 // ---- Helper: card description ----
 function cardDescription(card) {
@@ -1460,12 +1461,14 @@ function showGameOver() {
   scores.innerHTML = html;
   screen.classList.remove('hidden');
 
-  // Save game to history
-  saveGameToHistory(gameState, winnerIndex, getGameNotes(), typeof KapowTelemetry !== 'undefined' ? KapowTelemetry : null);
+  // Save game to history (skip for replayed games)
+  if (!isReplayGame) {
+    saveGameToHistory(gameState, winnerIndex, getGameNotes(), typeof KapowTelemetry !== 'undefined' ? KapowTelemetry : null);
 
-  // Prompt leaderboard submit if player won
-  if (winnerIndex === 0 && typeof promptLeaderboardSubmit === 'function') {
-    setTimeout(promptLeaderboardSubmit, 1500);
+    // Prompt leaderboard submit if player won
+    if (winnerIndex === 0 && typeof promptLeaderboardSubmit === 'function') {
+      setTimeout(promptLeaderboardSubmit, 1500);
+    }
   }
 }
 
@@ -2229,8 +2232,87 @@ window._replayAction = function(action) {
 };
 
 window._replayFromLog = function(logText, stopAtTurn, speed) {
+  isReplayGame = true;
   return replayFromLog(logText, stopAtTurn, speed);
 };
+
+// ---- Replay Import UI ─────────────────────────────
+// Right-click Export button → modal with paste/file/drop options
+// Replayed games are flagged and excluded from leaderboard/history.
+
+function showReplayImportModal() {
+  var overlay = document.getElementById('replay-import-overlay');
+  if (overlay) { overlay.classList.remove('hidden'); return; }
+
+  overlay = document.createElement('div');
+  overlay.id = 'replay-import-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;display:flex;align-items:center;justify-content:center';
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.classList.add('hidden'); });
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#1a1a2e;border:1px solid #444;border-radius:12px;padding:24px;width:90%;max-width:420px;color:#eee;font-family:sans-serif';
+
+  box.innerHTML = '<h3 style="margin:0 0 8px;font-size:16px;color:#fff">Replay a Game Log</h3>'
+    + '<p style="margin:0 0 12px;font-size:13px;color:#aaa">Paste a log, drop a file, or pick one. Replayed games won\'t count on the leaderboard.</p>'
+    + '<textarea id="replay-log-input" placeholder="Paste game log here..." style="width:100%;height:120px;background:#111;color:#eee;border:1px solid #555;border-radius:6px;padding:8px;font-size:12px;font-family:monospace;resize:vertical;box-sizing:border-box"></textarea>'
+    + '<div id="replay-drop-zone" style="margin:8px 0;padding:12px;border:2px dashed #555;border-radius:6px;text-align:center;font-size:13px;color:#888;cursor:pointer">Drop .txt file here or <label style="color:#6ea8fe;cursor:pointer;text-decoration:underline">choose file<input type="file" id="replay-file-input" accept=".txt,.log" style="display:none"></label></div>'
+    + '<div style="display:flex;gap:8px;margin-top:12px;align-items:center">'
+    + '<label style="font-size:13px;color:#aaa">Turn:</label><input id="replay-turn-input" type="number" value="99" min="1" style="width:60px;background:#111;color:#eee;border:1px solid #555;border-radius:4px;padding:4px 6px;font-size:13px">'
+    + '<label style="font-size:13px;color:#aaa;margin-left:8px">Speed:</label><select id="replay-speed-input" style="background:#111;color:#eee;border:1px solid #555;border-radius:4px;padding:4px;font-size:13px"><option value="3">3x</option><option value="5">5x</option><option value="10" selected>10x</option></select>'
+    + '<button id="replay-go-btn" style="margin-left:auto;background:#e63946;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:14px;font-weight:bold;cursor:pointer">Replay</button>'
+    + '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  var textarea = document.getElementById('replay-log-input');
+  var dropZone = document.getElementById('replay-drop-zone');
+  var fileInput = document.getElementById('replay-file-input');
+
+  // File input
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files.length) {
+      var reader = new FileReader();
+      reader.onload = function() { textarea.value = reader.result; dropZone.style.borderColor = '#6ea8fe'; dropZone.textContent = fileInput.files[0].name; };
+      reader.readAsText(fileInput.files[0]);
+    }
+  });
+
+  // Drag and drop
+  dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.style.borderColor = '#6ea8fe'; });
+  dropZone.addEventListener('dragleave', function() { dropZone.style.borderColor = '#555'; });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var file = e.dataTransfer.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function() { textarea.value = reader.result; dropZone.style.borderColor = '#6ea8fe'; dropZone.textContent = file.name; };
+      reader.readAsText(file);
+    }
+  });
+
+  // Go button
+  document.getElementById('replay-go-btn').addEventListener('click', function() {
+    var logText = textarea.value.trim();
+    if (!logText) { textarea.style.borderColor = '#e63946'; return; }
+    var turn = parseInt(document.getElementById('replay-turn-input').value) || 99;
+    var speed = parseInt(document.getElementById('replay-speed-input').value) || 10;
+    overlay.classList.add('hidden');
+    isReplayGame = true;
+    window._replayFromLog(logText, turn, speed);
+  });
+}
+
+// Wire right-click on Export button
+document.addEventListener('DOMContentLoaded', function() {
+  var exportBtn = document.getElementById('btn-export-log');
+  if (exportBtn) {
+    exportBtn.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      showReplayImportModal();
+    });
+  }
+});
 
 // ---- Start Game ----
 document.addEventListener('DOMContentLoaded', init);

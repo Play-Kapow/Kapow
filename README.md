@@ -98,7 +98,7 @@ Kai evaluates every possible action each turn:
 No build tools. No bundler. Auto-deploys to GitHub Pages on push to `main`.
 
 ```bash
-git clone https://github.com/cpheterson/Kapow.git
+git clone https://github.com/Play-Kapow/Kapow.git
 cd Kapow
 npm install                          # Test runner (Vitest)
 git config core.hooksPath hooks      # Pre-commit: tests + auto-version bump
@@ -108,6 +108,26 @@ python3 -m http.server 8000          # http://localhost:8000
 390 tests across 12 modules. Pre-commit hook runs them automatically.
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for full dev guide — architecture, AI, testing, versioning, deployment.
+
+## Replay / Bug Reproduction
+
+Players can export game logs via the **Export** button on the scorecard. To replay a game from a log:
+
+### In-game (easiest)
+Right-click the **Export** button → paste the log text, drop a `.txt` file, or pick one from disk. Set the target turn and speed, hit **Replay**. The game replays with full animations to that turn, then you take over and play from there. Replayed games are excluded from the leaderboard.
+
+### Console
+```js
+window._replayFromLog(logText, 18, 10)  // replay to turn 18 at 10x speed
+```
+
+### Playwright (automated testing)
+```bash
+npm install playwright
+python3 -m http.server 8000 &
+node test-lockup.mjs                    # automated lockup detection (5 games)
+node test-replay.mjs path/to/log.txt    # replay a specific game log
+```
 
 ---
 

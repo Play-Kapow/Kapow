@@ -6,6 +6,12 @@
 
 ### 03-12-2026
 
+**v27 [Eric]** feat: replay import UI + leaderboard guard + repo private
+- Right-click Export button → modal with paste/drop/file-select to replay a game log
+- Replayed games set `isReplayGame` flag — excluded from leaderboard and game history
+- Repo set to private
+- README: added replay documentation (in-game, console, Playwright)
+
 **v25 [Eric]** chore: cleanup triadAnimRef aliases, add auto-detect beta badge
 - Remove vestigial triadAnimRef local aliases — pass shared ref directly
 - Add URL-path-based branch detection for beta badge (zero merge conflicts)
