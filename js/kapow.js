@@ -1611,7 +1611,6 @@ window._onCardClick = function(triadIndex, position) {
     if (validTarget) {
       var fromSwapLabel = 'Triad ' + (from.triadIndex + 1) + ' (' + from.position + ')';
       var toSwapLabel = 'Triad ' + (triadIndex + 1) + ' (' + position + ')';
-      var triadAnimRef = triadAnimationInProgress;
       runWithTriadAnimation(0, function() {
         swapKapowCard(hand, from.triadIndex, from.position, triadIndex, position);
         logAction(gameState, 0, 'Swaps KAPOW! from ' + fromSwapLabel + ' to ' + toSwapLabel);
@@ -1627,7 +1626,7 @@ window._onCardClick = function(triadIndex, position) {
           gameState.awaitingKapowSwap = false;
           endTurn(gameState);
         }
-      }, gameState, triadAnimRef, refreshUI);
+      }, gameState, triadAnimationInProgress, refreshUI);
 
     }
     return;
@@ -1653,11 +1652,10 @@ window._onCardClick = function(triadIndex, position) {
             { label: '+' + drawnCard.modifiers[1] + ' (positive)', value: 'positive', style: 'primary' },
             { label: drawnCard.modifiers[0] + ' (negative)', value: 'negative', style: 'secondary' }
           ]).then(function(modChoice) {
-            var triadAnimRef = triadAnimationInProgress;
             runWithTriadAnimation(0, function() {
               handleAddPowersetFull(gameState, triadIndex, position, modChoice === 'positive');
-            }, gameState, triadAnimRef, refreshUI);
-      
+            }, gameState, triadAnimationInProgress, refreshUI);
+
           });
         } else if (choice === 'target-mod') {
           var existingPower = targetPosCards[0];
@@ -1665,18 +1663,16 @@ window._onCardClick = function(triadIndex, position) {
             { label: '+' + existingPower.modifiers[1] + ' (positive)', value: 'positive', style: 'primary' },
             { label: existingPower.modifiers[0] + ' (negative)', value: 'negative', style: 'secondary' }
           ]).then(function(modChoice) {
-            var triadAnimRef = triadAnimationInProgress;
             runWithTriadAnimation(0, function() {
               handleCreatePowersetOnPower(gameState, triadIndex, position, modChoice === 'positive');
-            }, gameState, triadAnimRef, refreshUI);
-      
+            }, gameState, triadAnimationInProgress, refreshUI);
+
           });
         } else {
-          var triadAnimRef = triadAnimationInProgress;
           runWithTriadAnimation(0, function() {
             handlePlaceCardFull(gameState, triadIndex, position);
-          }, gameState, triadAnimRef, refreshUI);
-    
+          }, gameState, triadAnimationInProgress, refreshUI);
+
         }
       });
       return;
@@ -1697,18 +1693,16 @@ window._onCardClick = function(triadIndex, position) {
             { label: '+' + drawnCard.modifiers[1] + ' (positive)', value: 'positive', style: 'primary' },
             { label: drawnCard.modifiers[0] + ' (negative)', value: 'negative', style: 'secondary' }
           ]).then(function(modChoice) {
-            var triadAnimRef = triadAnimationInProgress;
             runWithTriadAnimation(0, function() {
               handleAddPowersetFull(gameState, triadIndex, position, modChoice === 'positive');
-            }, gameState, triadAnimRef, refreshUI);
-      
+            }, gameState, triadAnimationInProgress, refreshUI);
+
           });
         } else {
-          var triadAnimRef = triadAnimationInProgress;
           runWithTriadAnimation(0, function() {
             handlePlaceCardFull(gameState, triadIndex, position);
-          }, gameState, triadAnimRef, refreshUI);
-    
+          }, gameState, triadAnimationInProgress, refreshUI);
+
         }
       });
       return;
@@ -1721,11 +1715,10 @@ window._onCardClick = function(triadIndex, position) {
         { label: 'Choose Different Spot', value: 'cancel', style: 'secondary' }
       ]).then(function(choice) {
         if (choice === 'replace') {
-          var triadAnimRef = triadAnimationInProgress;
           runWithTriadAnimation(0, function() {
             handlePlaceCardFull(gameState, triadIndex, position);
-          }, gameState, triadAnimRef, refreshUI);
-    
+          }, gameState, triadAnimationInProgress, refreshUI);
+
         }
         // 'cancel' — do nothing, player picks a different spot
       });
@@ -1739,11 +1732,10 @@ window._onCardClick = function(triadIndex, position) {
         { label: 'Choose Different Spot', value: 'cancel', style: 'secondary' }
       ]).then(function(choice) {
         if (choice === 'replace') {
-          var triadAnimRef = triadAnimationInProgress;
           runWithTriadAnimation(0, function() {
             handlePlaceCardFull(gameState, triadIndex, position);
-          }, gameState, triadAnimRef, refreshUI);
-    
+          }, gameState, triadAnimationInProgress, refreshUI);
+
         }
       });
       return;
@@ -1761,27 +1753,24 @@ window._onCardClick = function(triadIndex, position) {
             { label: '+' + existingPower.modifiers[1] + ' (positive)', value: 'positive', style: 'primary' },
             { label: existingPower.modifiers[0] + ' (negative)', value: 'negative', style: 'secondary' }
           ]).then(function(modChoice) {
-            var triadAnimRef = triadAnimationInProgress;
             runWithTriadAnimation(0, function() {
               handleCreatePowersetOnPower(gameState, triadIndex, position, modChoice === 'positive');
-            }, gameState, triadAnimRef, refreshUI);
-      
+            }, gameState, triadAnimationInProgress, refreshUI);
+
           });
         } else {
-          var triadAnimRef = triadAnimationInProgress;
           runWithTriadAnimation(0, function() {
             handlePlaceCardFull(gameState, triadIndex, position);
-          }, gameState, triadAnimRef, refreshUI);
-    
+          }, gameState, triadAnimationInProgress, refreshUI);
+
         }
       });
       return;
     }
 
-    var triadAnimRef = triadAnimationInProgress;
     runWithTriadAnimation(0, function() {
       handlePlaceCardFull(gameState, triadIndex, position);
-    }, gameState, triadAnimRef, refreshUI);
+    }, gameState, triadAnimationInProgress, refreshUI);
 
     return;
   }
@@ -2231,10 +2220,9 @@ window._replayAction = function(action) {
       break;
     case 'place':
       // Use runWithTriadAnimation so triad completion animations play
-      var triadAnimRef = triadAnimationInProgress;
       runWithTriadAnimation(gameState.currentPlayer, function() {
         handlePlaceCardFull(gameState, action.triadIndex, action.position);
-      }, gameState, triadAnimRef, refreshUI);
+      }, gameState, triadAnimationInProgress, refreshUI);
 
       break;
   }

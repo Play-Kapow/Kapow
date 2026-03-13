@@ -6,6 +6,11 @@
 
 ### 03-12-2026
 
+**v25 [Eric]** chore: cleanup triadAnimRef aliases, add auto-detect beta badge
+- Remove vestigial triadAnimRef local aliases — pass shared ref directly
+- Add URL-path-based branch detection for beta badge (zero merge conflicts)
+- Fix hardcoded path in test-replay.mjs
+
 **v24 [Eric]** feat: game log replay system + version tag in exported logs
 - New `js/replay.js`: parses exported game logs, reconstructs exact deck order, replays human moves at configurable speed
 - `deck.js`: added `setRiggedDeck()` to inject pre-determined deck for replay

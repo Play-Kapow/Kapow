@@ -6,7 +6,7 @@ import { chromium } from 'playwright';
 import { readFileSync } from 'fs';
 
 const URL = 'http://localhost:8000';
-const LOG_PATH = '/Users/elp/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/87E96ECB-55DE-4686-9547-878BD325BF0A/kapow-log (78).txt';
+const LOG_PATH = process.argv[2] || './tests/fixtures/sample-log.txt';
 
 async function main() {
   const logText = readFileSync(LOG_PATH, 'utf-8');

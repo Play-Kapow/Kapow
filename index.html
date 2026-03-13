@@ -39,6 +39,25 @@
   </style>
 
   <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Detect branch from deploy path (e.g. /beta/ → "BETA")
+    (function() {
+      var m = location.pathname.match(/^\/([a-z][\w-]*)\//i);
+      if (m && m[1].toLowerCase() !== 'index') {
+        var branch = m[1].toUpperCase();
+        document.addEventListener('DOMContentLoaded', function() {
+          // Append to version string
+          var ver = document.querySelector('.scorecard-version');
+          if (ver) ver.textContent = ver.textContent + ' \u00b7 ' + branch;
+          // Floating badge
+          var badge = document.createElement('div');
+          badge.textContent = branch;
+          badge.style.cssText = 'position:fixed;top:8px;right:8px;background:#e63946;color:#fff;font:bold 11px/1 sans-serif;padding:3px 8px;border-radius:4px;z-index:9999;opacity:0.85;pointer-events:none';
+          document.body.appendChild(badge);
+        });
+      }
+    })();
+  </script>
 
   <!-- Google Analytics (GA4) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G9DW4L5Y5X"></script>
@@ -279,7 +298,7 @@
         <a href="#" class="scorecard-deck-link footer-buy" onclick="event.preventDefault();event.stopPropagation();showBuyModal()">Get the Card Game &rarr;</a>
       </div>
     </div>
-    <div class="scorecard-version">03-12-2026 v24</div>
+    <div class="scorecard-version">03-12-2026 v26</div>
     </div>
     <div id="ai-commentary"></div>
   </div>
