@@ -6,6 +6,11 @@
 
 ### 03-14-2026
 
+**v2 [Chuck]** fix: reset all controller flags on new game
+- `triadAnimationInProgress`, `roundEndAcknowledged`, and `aiSwapHistory` were not cleared in `onNewGame()`
+- If a triad animation was active at game end, AI turns would be blocked in the next game
+- Round-end screen could malfunction in round 1 of new game due to stale acknowledgement flag
+
 **v1 [Chuck]** update buy page content and product images
 - Added trademark symbol to KAPOW! header
 - Replaced marketing copy with new content: tagline, Perfect for/Highlights columns, What Makes KAPOW! Different card types, Overview steps, Learn section

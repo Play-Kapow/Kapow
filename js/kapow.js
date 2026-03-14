@@ -1358,7 +1358,10 @@ function onNextRound() {
 function onNewGame() {
   document.getElementById('game-over-screen').classList.add('hidden');
   aiTurnInProgress = false;
+  triadAnimationInProgress = { value: false };
+  roundEndAcknowledged = false;
   aiMoveExplanation = '';
+  aiSwapHistory = [];
   var explainModal = document.getElementById('explain-modal');
   if (explainModal) explainModal.classList.add('hidden');
 
