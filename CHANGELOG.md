@@ -6,6 +6,12 @@
 
 ### 03-14-2026
 
+**v3 [Chuck]** buy page: text fixes, mobile layout, font sizing, hyperlinks
+- "What You Get" bullet points: initial cap first word only
+- Review form: inputs stack vertically on mobile (no overflow)
+- Body text bumped +2px across the page
+- Linked video tutorial (YouTube), rules PDF, and Kai to game page — all open in new tab
+
 **v2 [Chuck]** fix: reset all controller flags on new game
 - `triadAnimationInProgress`, `roundEndAcknowledged`, and `aiSwapHistory` were not cleared in `onNewGame()`
 - If a triad animation was active at game end, AI turns would be blocked in the next game
