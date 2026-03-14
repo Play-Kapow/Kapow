@@ -6,6 +6,8 @@
 
 ### 03-14-2026
 
+**v5 [Eric]** fix: onNextRound uses resetController (same bug pattern as onNewGame)
+
 **v3 [Chuck]** buy page: text fixes, mobile layout, font sizing, hyperlinks
 - "What You Get" bullet points: initial cap first word only
 - Review form: inputs stack vertically on mobile (no overflow)

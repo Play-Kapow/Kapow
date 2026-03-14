@@ -1345,8 +1345,7 @@ function onDiscard() {
 
 function onNextRound() {
   document.getElementById('round-end-screen').classList.add('hidden');
-  c.roundEndAcknowledged = false;
-  c.aiTurnInProgress = false;
+  resetController();
   advanceRoundFull(gameState);
   refreshUI();
 }
