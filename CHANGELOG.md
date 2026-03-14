@@ -12,11 +12,6 @@
 - Body text bumped +2px across the page
 - Linked video tutorial (YouTube), rules PDF, and Kai to game page — all open in new tab
 
-**v2 [Chuck]** fix: reset all controller flags on new game
-- `triadAnimationInProgress`, `roundEndAcknowledged`, and `aiSwapHistory` were not cleared in `onNewGame()`
-- If a triad animation was active at game end, AI turns would be blocked in the next game
-- Round-end screen could malfunction in round 1 of new game due to stale acknowledgement flag
-
 **v1 [Chuck]** update buy page content and product images
 - Added trademark symbol to KAPOW! header
 - Replaced marketing copy with new content: tagline, Perfect for/Highlights columns, What Makes KAPOW! Different card types, Overview steps, Learn section
@@ -25,6 +20,23 @@
 - Added ENJOY! section with table game photo caption
 - Added KAPOW! Game Company footer line
 - Removed photo placeholders, email capture section, and Now Available badge
+
+### 03-13-2026
+
+**v9 [Eric]** update share text — playkapow.com URL, shorter toast
+
+**v6 [Eric]** refactor: centralized controller state
+- New `controller.js` — single source of truth for all mutable controller flags
+- Eliminates primitive-by-value copy bug class (the root cause of T18 lockup)
+- `triadAnimationInProgress` no longer needs `{value: bool}` wrapper — plain boolean on shared object
+- `runWithTriadAnimation` signature: 4 args now, not 5 (removed `triadAnimationInProgress` param)
+- Moved: `aiTurnInProgress`, `triadAnimationInProgress`, `roundEndAcknowledged`, `aiMoveExplanation`, `aiSwapHistory`, `aiDelay`, `isReplayGame` from scattered `var` declarations to `controller.js`
+- Renamed: `AI_DELAY` -> `aiDelay`, `_originalAIDelay` -> `_originalAiDelay` (camelCase consistency)
+- `onNewGame()` calls `resetController()` — fixes replay-to-new-game bug (stale `isReplayGame` and `aiDelay`)
+- DEFAULTS pattern: add new flags in one place, `resetController()` picks them up automatically
+- Docs: CLAUDE.md, CONTRIBUTING.md, README.md updated with controller pattern, migration notes, gotchas
+- 5 new controller tests (defaults, mutations, reset completeness, array isolation)
+- All 397 tests pass, zero behavioral change
 
 ### 03-12-2026
 
