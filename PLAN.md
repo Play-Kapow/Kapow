@@ -4,11 +4,12 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-## Current State (03-12-2026)
+## Current State (03-13-2026)
 
-**Live at:** cpheterson.github.io/Kapow/ (GitHub Pages, auto-deploys on push to `main`)
-**Repo:** github.com/cpheterson/Kapow (single `main` branch, both contributors push here)
-**Version:** 03-04-2026 v8
+**Live at:** playkapow.com (Cloudflare Pages) + cpheterson.github.io/Kapow/ (GitHub Pages fallback)
+**Repo:** github.com/cpheterson/Kapow (private, `main` + `beta` branches)
+**Version:** 03-12-2026 v2 (beta)
+**Architecture:** ES modules (16 modules, no IIFE)
 
 ### What's Working
 - Full 2-player game vs Kai (AI opponent)
@@ -23,6 +24,24 @@ The living document. Updated in real-time throughout every session.
 - Dopamine hits: round win celebrations, streak badges, personal best detection
 - Leaderboard (top 25 lowest-score winners from telemetry API)
 - Game history saved to localStorage (last 50 games)
+
+---
+
+## Session Log (03-13-2026)
+
+### Done
+- [x] Resolved rebase conflict: skipped Chuck's version-in-log commit (Eric's v24 already added it)
+- [x] Pulled Eric's full ES module refactor onto local beta (v2-v27, 20+ commits)
+- [x] Reviewed ES module architecture — 16 modules, no circular deps, clean separation
+- [x] Reviewed AI port — all 24 functions faithfully ported, all 6 Chuck fixes present
+- [x] Reviewed replay feature — deck reconstruction, async polling, leaderboard guard
+- [x] Reviewed core modules (deck, hand, triad, scoring, rules, gameState) — all correct
+- [x] All 392 tests pass
+
+### Notes for Eric
+- Powerset case missing from `_replayAction()` (likely fine since powersets auto-trigger)
+- No animation timeout recovery — if callback lost, AI hangs forever
+- Card pool hardcoded in `replay.js` vs. `deck.js` — two places to update
 
 ---
 
@@ -288,10 +307,11 @@ The living document. Updated in real-time throughout every session.
 
 ## Tech Debt
 
-- [ ] **IIFE → ES Module refactor** — modular files exist for testing, production still runs from single kapow.js IIFE
-- [ ] **Port full AI to modular ai.js** — current test version is simplified (~300 lines vs ~1,600 in production)
+- [x] **IIFE → ES Module refactor** — completed by Eric (v2-v27 on beta). 16 ES modules, no build step.
+- [x] **Port full AI to modular ai.js** — completed by Eric (v18-v19). Full ~2,800 line AI with all Chuck's fixes.
 - [ ] **App icon / favicon** — current PWA icons are placeholder
 - [ ] Desktop layout polish (left/right or better top/down for wide screens)
+- [ ] **Animation timeout recovery** — if triadAnimationInProgress callback never fires, AI hangs. Add 5-second safety timeout.
 
 ## AI Improvement Ideas
 

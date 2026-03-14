@@ -71,7 +71,7 @@
     /* ---- Hero ---- */
     .hero {
       text-align: center;
-      padding: 80px 24px 60px;
+      padding: 80px 24px 40px;
       position: relative;
     }
 
@@ -97,7 +97,7 @@
       letter-spacing: 6px;
       line-height: 1;
       margin-bottom: 8px;
-      text-shadow: 0 4px 24px rgba(251, 191, 36, 0.3);
+      text-shadow: none;
       animation: fadeSlideIn 0.6s ease-out 0.1s both;
     }
 
@@ -335,15 +335,13 @@
     /* Photo placeholder grid */
     .photo-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-bottom: 48px;
     }
 
     .photo-slot {
-      aspect-ratio: 4/3;
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-      border: 2px dashed rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       display: flex;
       flex-direction: column;
@@ -361,8 +359,8 @@
 
     .photo-slot.has-image img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      object-fit: contain;
     }
 
     .photo-slot svg {
@@ -384,7 +382,7 @@
 
     .price-amount {
       font-family: var(--font-display);
-      font-size: 48px;
+      font-size: 36px;
       color: var(--color-accent);
       letter-spacing: 2px;
     }
@@ -703,6 +701,148 @@
       margin-bottom: 12px;
     }
 
+    /* ---- Info Columns (Perfect for / Highlights) ---- */
+    .info-columns {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .info-col h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--color-accent);
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .info-col ul {
+      list-style: none;
+    }
+
+    .info-col li {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 5px 0;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .info-col li::before {
+      content: '\2022';
+      color: var(--color-accent);
+      position: absolute;
+      left: 0;
+    }
+
+    /* ---- Card Types (What Makes KAPOW! Different) ---- */
+    .card-types {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      text-align: center;
+    }
+
+    .card-types h2 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--color-accent);
+      letter-spacing: 3px;
+      margin-bottom: 48px;
+    }
+
+    .card-types-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 32px;
+    }
+
+    .card-type-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-align: left;
+    }
+
+    .card-type-card h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--color-accent);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .card-type-card p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+
+    /* ---- Learn Section ---- */
+    .learn {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      text-align: center;
+    }
+
+    .learn h2 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--color-accent);
+      letter-spacing: 3px;
+      margin-bottom: 32px;
+    }
+
+    .learn ul {
+      list-style: none;
+      display: inline-block;
+      text-align: left;
+    }
+
+    .learn li {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .learn li::before {
+      content: '\2022';
+      color: var(--color-accent);
+      position: absolute;
+      left: 0;
+    }
+
+    /* ---- Enjoy Section ---- */
+    .enjoy {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      text-align: center;
+    }
+
+    .enjoy h2 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--color-accent);
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+    }
+
+    .enjoy p {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+
     /* ---- Animations ---- */
     @keyframes fadeSlideIn {
       from {
@@ -751,6 +891,16 @@
         flex-direction: column;
       }
 
+      .info-columns {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .card-types-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
       .features-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -772,131 +922,147 @@
 
   <!-- Hero -->
   <section class="hero">
-    <div class="hero-badge">Now Available</div>
-    <h1>KAPOW!</h1>
+    <h1>KAPOW!<sup style="font-size:0.3em; vertical-align:super;">&trade;</sup></h1>
     <div class="hero-subtitle">Card Game</div>
-    <p class="hero-tagline">The original card game of triads, strategy, and a little bit of chaos. Outsmart your opponents, complete your triads, and try not to get KAPOW'd.</p>
-    <div class="hero-actions">
-      <a href="#buy" class="btn btn-primary">Get the Deck</a>
-      <a href="../" class="btn btn-secondary">Play Free Online</a>
-    </div>
+    <p class="hero-tagline">A Rummy-like Card Game With a Strategic TWIST!</p>
+    <p class="hero-description" style="font-size:16px; color:rgba(255,255,255,0.65); max-width:560px; margin:0 auto 0; line-height:1.7; animation:fadeSlideIn 0.6s ease-out 0.25s both;">Unlike luck-of-the-draw games, KAPOW! rewards strategic thinking, careful placement, and clever play. Every round offers new tactical opportunities and meaningful decisions.</p>
   </section>
 
-  <!-- Card Showcase -->
-  <div class="card-showcase">
-    <div class="showcase-card card-fixed">
-      <span class="card-value">7</span>
-      <span class="card-label">Fixed</span>
+  <!-- Perfect For & Highlights -->
+  <section class="info-columns">
+    <div class="info-col">
+      <h3>Perfect for:</h3>
+      <ul>
+        <li>Family game nights</li>
+        <li>Travel and vacations</li>
+        <li>Competitive game groups</li>
+        <li>Strategy-focused players</li>
+        <li>Casual and serious card gamers alike</li>
+      </ul>
     </div>
-    <div class="showcase-card card-power">
-      <span class="card-value">3</span>
-      <span class="card-label">Power</span>
-    </div>
-    <div class="showcase-card card-kapow">
-      <span class="card-value">KAPOW!</span>
-      <span class="card-label">Wild</span>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- Features -->
-  <section class="features">
-    <h2>Why KAPOW!</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <span class="feature-icon" aria-hidden="true">&#9824;</span>
-        <h3>Easy to Learn</h3>
-        <p>Teach anyone in 2 minutes. Draw, place, discard. Complete 4 triads of sequential numbers to win.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon" aria-hidden="true">&#9829;</span>
-        <h3>Hard to Master</h3>
-        <p>Every card you discard could help your opponent. Every KAPOW! reshuffles your strategy. No two games are alike.</p>
-      </div>
-      <div class="feature-card">
-        <span class="feature-icon" aria-hidden="true">&#9830;</span>
-        <h3>2-4 Players</h3>
-        <p>Perfect for game night, travel, or anywhere you've got 15 minutes and a competitive streak.</p>
-      </div>
+    <div class="info-col">
+      <h3>Highlights:</h3>
+      <ul>
+        <li>2 to 8 players</li>
+        <li>Ages 8+</li>
+        <li>Fast paced, 30-minute game</li>
+        <li>Easy to learn, hard to master</li>
+        <li>Fun for all skill levels</li>
+      </ul>
     </div>
   </section>
 
   <div class="divider"></div>
 
-  <!-- How to Play -->
+  <!-- What Makes KAPOW! Different -->
+  <section class="card-types">
+    <h2>What Makes KAPOW! Different?</h2>
+    <div class="card-types-grid">
+      <div class="card-type-card">
+        <h3>&#x1F4A5; Fixed Value Cards</h3>
+        <p>The core foundation for building runs and straights. Values of 0 through 12.</p>
+      </div>
+      <div class="card-type-card">
+        <h3>&#x1F4A5; Power Cards</h3>
+        <p>Raise or lower values when combined with fixed value cards &mdash; adding a layer of tactical decisions. For example, convert a fixed value 6 card into a 4 or an 8.</p>
+      </div>
+      <div class="card-type-card">
+        <h3>&#x1F4A5; KAPOW! Cards</h3>
+        <p>Wild cards that can be moved within your hand for maximum strategic advantage.</p>
+      </div>
+    </div>
+    <img src="images/Full Deck - Flat.png" alt="KAPOW! full card deck layout" style="width:100%; max-width:900px; margin-top:40px; border-radius:12px;">
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Overview -->
   <section class="how-to-play">
-    <h2>How It Works</h2>
+    <h2>Overview</h2>
     <div class="steps">
       <div class="step">
         <span class="step-number">1</span>
         <div>
-          <h3>Build Your Triads</h3>
-          <p>Arrange cards into four groups of three sequential numbers. Lower is better &mdash; a 1-2-3 triad beats a 7-8-9.</p>
+          <h3>Starting a Round</h3>
+          <p>Each player receives a hand of twelve face-down cards and arranges them into four columns with three cards each, referred to as &lsquo;triads&rsquo;. The remaining cards form a draw pile and discard pile.</p>
         </div>
       </div>
       <div class="step">
         <span class="step-number">2</span>
         <div>
-          <h3>Draw &amp; Decide</h3>
-          <p>Each turn, draw from the deck or grab from the discard pile. Place it, swap it, or toss it. Every choice matters.</p>
+          <h3>Playing a Round</h3>
+          <p>Through successive turns, cards are revealed and may be retained, replaced, or discarded as needed to &lsquo;complete&rsquo; each triad into a sequential run (1, 2, 3) or matched set (5, 5, 5). Completed triads are discarded, reducing the points in a player&rsquo;s hand.</p>
         </div>
       </div>
       <div class="step">
         <span class="step-number">3</span>
         <div>
-          <h3>Watch for KAPOW!</h3>
-          <p>The wild card. It completes any triad &mdash; but it can also blow up your opponent's best-laid plans.</p>
+          <h3>The Twist</h3>
+          <p>Innovative cards provide creative new ways to complete your triads into runs and sets. Power cards can be used to raise or lower the value of fixed value cards in a triad. KAPOW! cards are wild cards that can be moved within or across triads.</p>
         </div>
       </div>
       <div class="step">
         <span class="step-number">4</span>
         <div>
-          <h3>Go Out &amp; Score</h3>
-          <p>Complete all four triads to end the round. Everyone else totals their incomplete cards. Lowest score after 5 rounds wins.</p>
+          <h3>Ending a Round</h3>
+          <p>A player exits a round when all cards in their hand are discarded or revealed. Each player then gets one final turn and the round ends. The player who went out first starts the next round. After ten rounds, the player with the lowest score is the winner.</p>
         </div>
       </div>
     </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Learn -->
+  <section class="learn">
+    <h2>Learn</h2>
+    <ul>
+      <li>Start with our video tutorial</li>
+      <li>Review our online rules and strategy guide</li>
+      <li>Challenge Kai, our awesome AI-tutor, to a game</li>
+      <li>Learn as you play</li>
+      <li>Request hints and tips</li>
+      <li>Ask Kai to explain his moves</li>
+      <li>Access Kai through mobile and desktop devices</li>
+      <li>Join our Leaderboard</li>
+      <li>Get the physical deck and challenge your friends</li>
+    </ul>
   </section>
 
   <div class="divider"></div>
 
   <!-- Product / Buy -->
   <section class="product" id="buy">
-    <h2>Get the Real Deck</h2>
-    <p class="product-description">The same game you love online, now in your hands. Premium card stock, bold colors, and that satisfying shuffle.</p>
-
-    <!-- Product photos — Chuck will provide these -->
+    <h2>The KAPOW! Deck is Now Available</h2>
     <div class="photo-grid" id="product-photos">
-      <div class="photo-slot">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        Product photo
+      <div class="photo-slot has-image">
+        <img src="images/The Case.png" alt="KAPOW! travel case">
       </div>
-      <div class="photo-slot">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        Cards close-up
-      </div>
-      <div class="photo-slot">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        Gameplay
+      <div class="photo-slot has-image">
+        <img src="images/Product Set.png" alt="KAPOW! deck, rules, and case">
       </div>
     </div>
 
     <!-- Price + Buy -->
     <div class="price-block" id="price-block">
-      <div class="price-amount" id="price-display">$19.99</div>
-      <div class="price-shipping">+ shipping</div>
+      <div class="price-amount" id="price-display">What You Get</div>
       <ul class="price-includes">
-        <li>Full 55-card KAPOW! deck</li>
-        <li>Quick-start rules card</li>
-        <li>2&ndash;4 players, ages 8+</li>
-        <li>15-minute games</li>
+        <li>Durable Plastic Travel Case</li>
+        <li>118 Travel Friendly, Poker-Size Cards</li>
+        <li>Printed rules and strategy sheet</li>
       </ul>
       <!-- Buy button — mode switches between email capture and Stripe -->
       <a href="#" class="btn btn-primary btn-buy" id="buy-btn" onclick="handleBuy(event)">
         Buy Now
       </a>
     </div>
+  </section>
+
+  <!-- Enjoy -->
+  <section class="enjoy">
+    <h2>ENJOY!</h2>
+    <img src="images/Table Game.jpg" alt="Two players enjoying KAPOW!" style="width:100%; max-width:700px; margin-top:40px; border-radius:12px;">
+    <p style="margin-top:16px; font-size:16px; color:rgba(255,255,255,0.5); font-style:italic;">KAPOW! will become your favorite new game.</p>
   </section>
 
   <div class="divider"></div>
@@ -908,7 +1074,6 @@
 
     <!-- Approved reviews load here -->
     <div class="reviews-list" id="reviews-list">
-      <div class="review-empty" id="reviews-empty">Be the first to share your thoughts!</div>
     </div>
 
     <!-- Submit a review -->
@@ -927,27 +1092,14 @@
     </div>
   </section>
 
-  <!-- Email fallback (shown when Stripe not ready) -->
-  <section class="email-capture" id="email-section">
-    <p>Want to know when decks ship? Drop your email.</p>
-    <form class="email-form" id="email-form"
-          action="https://docs.google.com/forms/d/1du6KdHXiqiBiX0TLkgu83lnk3Kmo1JeWjdKPSSeNTDg/formResponse"
-          method="POST" target="buy-email-hidden"
-          onsubmit="handleEmailSubmit()">
-      <input type="email" name="entry.1116097858" placeholder="your@email.com" required>
-      <button type="submit" class="btn btn-primary">Notify Me</button>
-    </form>
-    <p class="email-thanks" id="email-thanks">You're on the list!</p>
-    <iframe name="buy-email-hidden" style="display:none;"></iframe>
-  </section>
 
   <!-- Footer -->
   <footer class="page-footer">
-    <div class="footer-links">
-      <a href="../">Play Online</a>
+    <div class="footer-links" style="justify-content:center;">
       <a href="mailto:feedback@kapowcardgame.com">Contact</a>
     </div>
     <p>KAPOW!&trade; Card Game</p>
+    <p style="margin-top:8px;">A product of the KAPOW! Game Company<sup style="font-size:0.6em;">&trade;</sup></p>
   </footer>
 
   <script>
@@ -964,7 +1116,7 @@
     const STRIPE_CHECKOUT_URL = '';
 
     // Set price (updated from Stripe or manually)
-    const DECK_PRICE = '$19.99';
+    const DECK_PRICE = 'What You Get';
 
     function handleBuy(e) {
       e.preventDefault();
@@ -1000,7 +1152,7 @@
         emailSection.style.display = 'none';
       } else {
         // Email mode — buy button scrolls to email capture
-        buyBtn.textContent = 'Get Notified';
+        buyBtn.textContent = 'Buy Now';
         emailSection.style.display = 'block';
       }
 

@@ -4,6 +4,17 @@
 
 ## Version History
 
+### 03-14-2026
+
+**v1 [Chuck]** update buy page content and product images
+- Added trademark symbol to KAPOW! header
+- Replaced marketing copy with new content: tagline, Perfect for/Highlights columns, What Makes KAPOW! Different card types, Overview steps, Learn section
+- Added product images: travel case, product set, full deck layout, table game photo
+- Updated price block: "What You Get" header with physical product includes (118 cards, travel case, rules sheet)
+- Added ENJOY! section with table game photo caption
+- Added KAPOW! Game Company footer line
+- Removed photo placeholders, email capture section, and Now Available badge
+
 ### 03-12-2026
 
 **v2 [Eric]** chore: Cloudflare Pages hosting + beta badge subdomain detection
