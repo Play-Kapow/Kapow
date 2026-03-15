@@ -6,6 +6,13 @@
 
 ### 03-14-2026
 
+**v7 [Chuck]** ai: draw from discard when KAPOW swap completes triad (R1T30)
+- `aiDecideDraw()` used `wouldHelpCompleteTriad()` which only checked direct placement completion
+- Missed within-triad KAPOW swap completions: T4[fd,K!,9] + draw 8 → swap K!↔9 → [8,9,K!(10)] run
+- Switched to `findTriadCompletionSpot()` which already handles all swap paths
+- Removed dead `wouldHelpCompleteTriad()` function
+- 1 regression test added
+
 **v6 [Chuck]** fix: prevent AI turn from firing during final-turn reveal-discard
 - When opponent's triads auto-complete on final turn reveal, `playAITurn()` was firing before the "Discard Completed Triad(s)" button could be used
 - Root cause: `refreshUI()` triggered AI turn while `pendingRevealDiscard` was active

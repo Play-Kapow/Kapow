@@ -167,6 +167,27 @@ describe('aiDecideDraw', () => {
     });
     expect(aiDecideDraw(state).choice).toBe('deck');
   });
+
+  test('R1T30: draws discard card that completes triad via within-triad KAPOW swap', () => {
+    // AI hand: T4[fd, K!, 9]. Discard: 8.
+    // Direct placement of 8 in top: T4[8, K!, 9] — NOT complete (no run in position order).
+    // But swapping K! ↔ 9: T4[8, 9, K!(10)] → ascending run [8,9,10] → complete!
+    // Bug: wouldHelpCompleteTriad() only checked direct completion, missing the swap path.
+    // AI rejected the 8 ("force going out with bad score 42 pts") and drew from deck.
+    // Fix: use findTriadCompletionSpot() which checks within-triad K! swaps.
+    const aiTriads = [
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      { ...makeTriad(0, 0, 0), isDiscarded: true },
+      makeTriad(fc(5, false), kapowCard(), fc(9)),    // T4: [fd, K!, 9]
+    ];
+    const state = makeAiState(aiTriads, {
+      discardPile: [fc(8)],
+    });
+    const result = aiDecideDraw(state);
+    expect(result.choice).toBe('discard');
+    expect(result.reason).toBe('completes a triad');
+  });
 });
 
 describe('aiDecideAction', () => {

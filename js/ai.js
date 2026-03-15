@@ -85,8 +85,8 @@ export function aiDecideDraw(gameState) {
 
   var aiHand = gameState.players[1].hand;
 
-  // Check if it completes a triad — always draw
-  if (wouldHelpCompleteTriad(aiHand, discardTop)) {
+  // Check if it completes a triad (including via KAPOW swap) — always draw
+  if (findTriadCompletionSpot(aiHand, discardTop)) {
     return { choice: 'discard', reason: 'completes a triad' };
   }
 
@@ -627,24 +627,6 @@ export function aiBuryKapowInCompletedTriad(hand, triadIndex) {
 }
 
 // ---- Helper Functions ----
-
-function wouldHelpCompleteTriad(hand, card) {
-  for (let t = 0; t < hand.triads.length; t++) {
-    const triad = hand.triads[t];
-    if (triad.isDiscarded) continue;
-
-    for (const pos of ['top', 'middle', 'bottom']) {
-      // Try replacing this position with the card and check completion
-      const origCards = triad[pos];
-      triad[pos] = [{ ...card, isRevealed: true }];
-      const complete = isTriadComplete(triad);
-      triad[pos] = origCards;
-
-      if (complete) return true;
-    }
-  }
-  return false;
-}
 
 function findTriadCompletionSpot(hand, card) {
   const positions = ['top', 'middle', 'bottom'];
