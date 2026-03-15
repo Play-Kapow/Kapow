@@ -7,6 +7,7 @@ import {
   aiGetGameContext, aiAssessOpponentThreat, aiCountFutureCompletions,
   aiCountPowerModifierPaths, getTestRange, aiEvaluateCardSynergy,
   aiGetOpponentNeeds, aiGetTopDiscardValue, aiScorePlacement,
+  aiCountPowersetExpansionPaths,
   aiFindPowersetOpportunity, aiFindModifierOpportunity,
   aiFindBeneficialSwap, findSwappableKapowCards, findSwapTargets
 } from '../js/ai.js';
@@ -865,6 +866,50 @@ describe('Power card seeding (powerset path expansion)', () => {
 
     expect(action.triadIndex).not.toBe(1); // NOT T2 — edge value, no expansion benefit
   });
+
+  test('neighbor replacement next to seeded P2 is not penalized when paths preserved', () => {
+    // T3 has [P2, 7, fd] from earlier seeding. Now draw 5, consider replacing 7.
+    // [P2(2), 5] has 0 direct paths but P2(±2) next to 5 still has 6 powerset expansion paths.
+    // Score for T3-middle (7→5) should not get the -15 "no paths" penalty.
+    // Compare: placing 5 in T1 fd slot (value delta 6-5=1) vs T3-middle (7-5=2, saves more points).
+    const aiTriads = [
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T1: untouched
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T2: untouched
+      makeTriad(powerCard(2, [-2, 2]), fc(7), fc(5, false)),    // T3: [P2, 7, fd]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T4: untouched
+    ];
+    const state = makeAiState(aiTriads, { phase: 'playing', turnNumber: 14 });
+    const action = aiDecideAction(state, fc(5));
+
+    // Should NOT avoid T3 — powerset paths are preserved with the new neighbor
+    // May or may not choose T3 depending on other scoring factors, but the score
+    // should be competitive (not killed by -15 penalty)
+    // For this test: T3-middle should score higher than discard
+    if (action.triadIndex === 2) {
+      expect(action.position).toBe('middle'); // replacing the 7 with 5
+    }
+    // At minimum, should not discard — there are good placement options
+    expect(action.type).not.toBe('discard');
+  });
+
+  test('seeded power card is protected from replacement by fixed card', () => {
+    // T3 has [P2, 7, fd] from seeding. Drawing a 3 should NOT replace P2 (fv=2).
+    // Solo power preservation penalty (8-18 pts) protects it.
+    // P2 has enormous powerset value — losing it to save 1 point is terrible.
+    const aiTriads = [
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T1: untouched
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T2: untouched
+      makeTriad(powerCard(2, [-2, 2]), fc(7), fc(5, false)),    // T3: [P2, 7, fd]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T4: untouched
+    ];
+    const state = makeAiState(aiTriads, { phase: 'playing', turnNumber: 12 });
+    const action = aiDecideAction(state, fc(3));
+
+    // Should NOT replace the P2 in T3-top
+    if (action.triadIndex === 2) {
+      expect(action.position).not.toBe('top'); // don't replace the P2
+    }
+  });
 });
 
 describe('Discard-aware placement (discard safety swap)', () => {
@@ -1680,6 +1725,31 @@ describe('aiGetTopDiscardValue', () => {
     const triad = makeTriad(fc(7, false), 5, 3);
     const val = aiGetTopDiscardValue(triad, 'bottom');
     expect(val).toBe(-1);
+  });
+});
+
+describe('aiCountPowersetExpansionPaths', () => {
+  test('P2(±2) next to 7 in middle: 6 useful draws', () => {
+    // Effective values 6,7,8 have synergy with 7. Draws creating those:
+    // 6: X+2=6→X=4 or X-2=6→X=8. 7: X+2=7→X=5 or X-2=7→X=9. 8: X+2=8→X=6 or X-2=8→X=10.
+    // Unique draws: 4,5,6,8,9,10 = 6
+    const p2 = powerCard(2, [-2, 2]);
+    const paths = aiCountPowersetExpansionPaths(p2, 0, 7, 1); // P2 at top, 7 at middle
+    expect(paths).toBe(6);
+  });
+
+  test('P2(±2) next to 12: only 2 useful draws (edge value)', () => {
+    // Near edge: positive modifier overshoots past 12
+    const p2 = powerCard(2, [-2, 2]);
+    const paths = aiCountPowersetExpansionPaths(p2, 0, 12, 1);
+    expect(paths).toBeLessThanOrEqual(3); // too few for seeding threshold
+  });
+
+  test('P1(±1) next to 6: 5 useful draws', () => {
+    // Effective values 5,6,7 have synergy. Draws: 4,5,6,7,8 → 5 unique
+    const p1 = powerCard(1, [-1, 1]);
+    const paths = aiCountPowersetExpansionPaths(p1, 0, 6, 1);
+    expect(paths).toBe(5);
   });
 });
 

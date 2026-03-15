@@ -34,7 +34,10 @@ The living document. Updated in real-time throughout every session.
   - P2(±2) next to 7: face value 2 has no synergy with 7, but modifier range means draws 4-10 can complete
   - AI now counts powerset expansion paths and suppresses synergy penalties when ≥ 3 paths exist
   - Best early/mid game with mid-range neighbors; naturally rejects edge values
-  - 2 regression tests added, all 403 tests pass
+  - Also handles neighbor replacement: replacing 7→5 next to P2 preserves paths, not penalized
+  - Seeded power cards protected from replacement by solo power preservation penalty (8-18 pts)
+  - Extracted `aiCountPowersetExpansionPaths()` helper for reuse
+  - 6 regression tests added, all 408 tests pass
 - [x] Fixed powerset completion missed when modifier raises effective value (R1T26)
   - `aiFindPowersetOpportunity()` always picked lowest-value modifier; P1+1→2 completes [2,2,2] but was never tried
   - Outer scoring dropped triad completion bonus (80), using only `improvement + 10`

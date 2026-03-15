@@ -1366,6 +1366,37 @@ export function aiGetTopDiscardValue(triad, completingPosition) {
   return -1; // unknown (face-down)
 }
 
+// Count powerset expansion paths: how many future draw values (0-12) could be placed
+// as a powerset on a power card at powerPosIdx, using either modifier, to create
+// completion potential with a neighbor at neighborPosIdx with neighborValue.
+// Returns the count of useful draw values (0 to 13).
+export function aiCountPowersetExpansionPaths(powerCard, powerPosIdx, neighborValue, neighborPosIdx) {
+  var paths = 0;
+  for (var px = 0; px <= 12; px++) {
+    var found = false;
+    for (var pmi = 0; pmi < 2 && !found; pmi++) {
+      var effVal = px + powerCard.modifiers[pmi];
+      if (effVal < 0 || effVal > 12) continue;
+      var tv = [null, null, null];
+      tv[powerPosIdx] = effVal;
+      tv[neighborPosIdx] = neighborValue;
+      var mi2 = -1;
+      for (var i = 0; i < 3; i++) { if (tv[i] === null) { mi2 = i; break; } }
+      if (mi2 >= 0) {
+        for (var v = 0; v <= 12; v++) {
+          tv[mi2] = v;
+          if (isSet(tv) || isAscendingRun(tv) || isDescendingRun(tv)) {
+            paths++;
+            found = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return paths;
+}
+
 // The core AI placement scoring function.
 // NOTE: In kapow.js this accessed `gameState` as a closure variable.
 // In the ES module version, gameState is passed as a parameter.
@@ -1596,31 +1627,7 @@ export function aiScorePlacement(hand, card, triadIndex, position, options, game
           if (psTurnNum <= 16) {
             var psNeighborValue = existingRevealed[0].value;
             var psNeighborPosIdx = existingRevealed[0].posIdx;
-            var powersetExpPaths = 0;
-            for (var px = 0; px <= 12; px++) {
-              var pxFound = false;
-              for (var pmi = 0; pmi < 2 && !pxFound; pmi++) {
-                var psEffVal = px + card.modifiers[pmi];
-                if (psEffVal < 0 || psEffVal > 12) continue;
-                var psTestVals = [null, null, null];
-                psTestVals[posIdx] = psEffVal;
-                psTestVals[psNeighborPosIdx] = psNeighborValue;
-                var psMissIdx = -1;
-                for (var psi = 0; psi < 3; psi++) {
-                  if (psTestVals[psi] === null) { psMissIdx = psi; break; }
-                }
-                if (psMissIdx >= 0) {
-                  for (var psv = 0; psv <= 12; psv++) {
-                    psTestVals[psMissIdx] = psv;
-                    if (isSet(psTestVals) || isAscendingRun(psTestVals) || isDescendingRun(psTestVals)) {
-                      powersetExpPaths++;
-                      pxFound = true;
-                      break;
-                    }
-                  }
-                }
-              }
-            }
+            var powersetExpPaths = aiCountPowersetExpansionPaths(card, posIdx, psNeighborValue, psNeighborPosIdx);
             if (powersetExpPaths >= 3) {
               // Meaningful expansion — suppress zero-synergy penalty, add bonus
               var psEarlyFactor = psTurnNum <= 6 ? 1.5 : psTurnNum <= 12 ? 1.0 : 0.5;
@@ -2114,10 +2121,32 @@ export function aiScorePlacement(hand, card, triadIndex, position, options, game
       score += 15 + (analysis.completionPaths * 4);
     } else if (analysis.revealedCount === 2 && analysis.completionPaths === 0) {
       // Two revealed cards with NO path to completion — BAD placement
-      // UNLESS this is a power card seeding play: the standard path check uses face value,
-      // but a power card's modifier range creates future powerset completion paths that
-      // the analysis doesn't see. Skip the penalty and add a small bonus instead.
-      if (hasPowersetExpansion) {
+      // UNLESS powerset expansion is in play: a power card's modifier range creates
+      // future completion paths that the standard analysis doesn't see.
+      // Check two cases: (1) fresh seeding (drawn power card), (2) neighbor replacement
+      // next to an existing power card in the triad.
+      var psetExpansionActive = hasPowersetExpansion;
+      if (!psetExpansionActive && gameState && gameState.phase === 'playing') {
+        var peTurnNum = gameState.turnNumber || 0;
+        if (peTurnNum <= 16) {
+          // Check if the triad has a revealed power card with expansion paths
+          for (var pei = 0; pei < 3 && !psetExpansionActive; pei++) {
+            var peCards = triad[positions[pei]];
+            if (peCards.length > 0 && peCards[0].type === 'power' && peCards[0].isRevealed) {
+              // Find the other revealed non-power card as neighbor
+              for (var pej = 0; pej < 3; pej++) {
+                if (pej === pei) continue;
+                var peNeighbor = triad[positions[pej]];
+                if (peNeighbor.length > 0 && peNeighbor[0].isRevealed && peNeighbor[0].type !== 'power') {
+                  var pePaths = aiCountPowersetExpansionPaths(peCards[0], pei, getPositionValue(peNeighbor), pej);
+                  if (pePaths >= 3) { psetExpansionActive = true; break; }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (psetExpansionActive) {
         score += 5; // powerset expansion creates hidden completion paths
       } else {
         // Penalize heavily: these cards don't work together

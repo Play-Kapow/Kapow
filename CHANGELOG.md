@@ -12,7 +12,10 @@
 - New: `aiScorePlacement()` counts powerset expansion paths (future draws that create completion potential via modifier range)
 - Suppresses synergy penalty and 2-revealed-0-paths penalty when expansion paths ≥ 3, adds scaling bonus
 - Best with mid-range neighbors (5-8) and early game; naturally rejects edge values (0-1, 11-12) where modifiers overshoot
-- 2 regression tests added (R4T9 scenario + edge value guard)
+- Neighbor replacement next to seeded power cards also recognized — replacing 7→5 next to P2 preserves paths
+- Seeded power cards protected by existing solo power preservation penalty (8-18 pts)
+- Extracted `aiCountPowersetExpansionPaths()` helper for reuse across scoring contexts
+- 6 regression tests added (seeding, edge guard, neighbor replacement, power card protection, path counting)
 
 **v9 [Chuck]** ai: powerset completion now detected when modifier raises effective value (R1T26)
 - T2[P2(2), 2, P1(1)] + draw 1: powerset with P1+1→eff 2 completes [2,2,2] set, scored only 13
