@@ -146,6 +146,7 @@ function startRoundFull(state) {
   state.selectedKapow = null;
   state.swappingWithinCompletedTriad = false;
   state.completedTriadIndex = -1;
+  state.pendingRevealDiscard = null;
 
   // Determine who goes first
   var firstPlayer;
@@ -1222,8 +1223,9 @@ function refreshUI() {
     showGameOver();
   }
 
-  // AI turn — only trigger if not already in progress and no triad animation playing
-  if (!isHumanTurn && !c.aiTurnInProgress && !c.triadAnimationInProgress && (phase === 'playing' || phase === 'finalTurns')) {
+  // AI turn — only trigger if not already in progress, no triad animation playing,
+  // and no pending reveal-discard (final turn auto-complete waiting for player to see it)
+  if (!isHumanTurn && !c.aiTurnInProgress && !c.triadAnimationInProgress && !gameState.pendingRevealDiscard && (phase === 'playing' || phase === 'finalTurns')) {
     c.aiTurnInProgress = true;
     setTimeout(playAITurn, 1000);
   }

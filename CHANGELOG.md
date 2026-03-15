@@ -6,6 +6,13 @@
 
 ### 03-14-2026
 
+**v6 [Chuck]** fix: prevent AI turn from firing during final-turn reveal-discard
+- When opponent's triads auto-complete on final turn reveal, `playAITurn()` was firing before the "Discard Completed Triad(s)" button could be used
+- Root cause: `refreshUI()` triggered AI turn while `pendingRevealDiscard` was active
+- Added `pendingRevealDiscard` guard to AI turn trigger in `refreshUI()`
+- Added `pendingRevealDiscard` reset in `startRoundFull()` for safety
+- Fixes: AI drawing/placing/swapping on already-complete hand, hand disappearing without discard button, stale messages carrying into next round
+
 **v5 [Eric]** fix: onNextRound uses resetController (same bug pattern as onNewGame)
 
 **v3 [Chuck]** buy page: text fixes, mobile layout, font sizing, hyperlinks

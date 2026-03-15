@@ -4,11 +4,11 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-## Current State (03-13-2026)
+## Current State (03-14-2026)
 
 **Live at:** playkapow.com (Cloudflare Pages) + cpheterson.github.io/Kapow/ (GitHub Pages fallback)
 **Repo:** github.com/cpheterson/Kapow (private, `main` + `beta` branches)
-**Version:** 03-12-2026 v2 (beta)
+**Version:** 03-14-2026 v4 (main)
 **Architecture:** ES modules (16 modules, no IIFE)
 
 ### What's Working
@@ -24,6 +24,18 @@ The living document. Updated in real-time throughout every session.
 - Dopamine hits: round win celebrations, streak badges, personal best detection
 - Leaderboard (top 25 lowest-score winners from telemetry API)
 - Game history saved to localStorage (last 50 games)
+
+---
+
+## Session Log (03-14-2026)
+
+### Done
+- [x] Updated buy/index.html with new marketing content, product images, hyperlinks, mobile layout fixes
+- [x] Fixed new-game reset bug: added missing resets for `triadAnimationInProgress`, `roundEndAcknowledged`, `aiSwapHistory` in `onNewGame()`
+- [x] Fixed final-turn reveal-discard race condition (Mindy's R6 bugs 1-4)
+  - `refreshUI()` triggered `playAITurn()` while `pendingRevealDiscard` was active
+  - AI drew/placed/swapped on already-complete hand; hand disappeared without discard button; stale messages into next round
+  - Added `!gameState.pendingRevealDiscard` guard to AI turn trigger + cleared at round start
 
 ---
 
@@ -324,4 +336,4 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
-*Last updated: 03-10-2026*
+*Last updated: 03-14-2026*
