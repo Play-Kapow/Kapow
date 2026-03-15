@@ -6,6 +6,14 @@
 
 ### 03-14-2026
 
+**v8 [Chuck]** ai: fix KAPOW opportunity cost for triads containing KAPOW (R1T4)
+- Completing T2[fd,K!,P1] with a 1 saved only ~2 real points but burned KAPOW flexibility at turn 4
+- Bug 1: opportunity cost check only fired when the *placed* card was KAPOW, not when triad *contained* KAPOW
+- Bug 2: `currentSlotValue` read from simulated triad (KAPOW=25) instead of original card value
+- Bug 3: `existingPoints` used raw 25 for KAPOW instead of turn-adjusted value (8 early, 15 mid, 25 late)
+- All three fixed; KAPOW opportunity cost now correctly blocks low-value completions involving existing KAPOWs
+- 2 regression tests updated/added
+
 **v7 [Chuck]** ai: draw from discard when KAPOW swap completes triad (R1T30)
 - `aiDecideDraw()` used `wouldHelpCompleteTriad()` which only checked direct placement completion
 - Missed within-triad KAPOW swap completions: T4[fd,K!,9] + draw 8 → swap K!↔9 → [8,9,K!(10)] run

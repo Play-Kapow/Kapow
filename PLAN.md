@@ -27,6 +27,23 @@ The living document. Updated in real-time throughout every session.
 
 ---
 
+## Session Log (03-15-2026)
+
+### Done
+- [x] Fixed KAPOW opportunity cost not triggering for triads containing KAPOW (R1T4)
+  - T2[fd,K!,P1] + draw 1 → completed for ~2 real points, wasting KAPOW flexibility at turn 4
+  - Bug 1: check only fired when placed card was KAPOW, not when triad contained KAPOW
+  - Bug 2: `currentSlotValue` read from simulated triad (KAPOW=25) instead of original card
+  - Bug 3: `existingPoints` used raw 25 for KAPOW instead of turn-adjusted value
+  - 2 regression tests updated/added, all 399 tests pass
+- [x] Fixed draw decision missing KAPOW swap completions (R1T30 from Mindy's log)
+  - Switched `aiDecideDraw()` from `wouldHelpCompleteTriad()` to `findTriadCompletionSpot()`
+  - 1 regression test added
+- [x] Fixed final-turn reveal-discard race condition (Mindy's R6 bugs 1-4)
+  - Added `!gameState.pendingRevealDiscard` guard to AI turn trigger in `refreshUI()`
+
+---
+
 ## Session Log (03-14-2026)
 
 ### Done

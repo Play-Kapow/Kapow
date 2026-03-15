@@ -714,11 +714,11 @@ describe('aiEvaluateDiscardSafety — KAPOW swap completion', () => {
 });
 
 describe('aiDecideAction — KAPOW opportunity cost', () => {
-  test('R2T16: KAPOW completes triad via candidate scoring', () => {
+  test('R2T16: KAPOW skips low-value triad completion when fd cards remain', () => {
     // T1: discarded, T2: [0,9,0] all revealed, T3: [fd,4,fd], T4: [fd,fd,fd]
-    // KAPOW at T2-middle creates [0,K!,0] — KAPOW is wild, completing the triad.
-    // Candidate scoring: triad completion bonus (+200) makes T2-middle the clear winner
-    // over placing KAPOW in T3 or T4 (which only get face-down replacement bonuses).
+    // KAPOW at T2-middle creates [0,K!,0] — completing saves only 9 points.
+    // fdCount=5, savingsFloor=15. adjustedPoints=9 < 15 → completion bonus suppressed.
+    // KAPOW should seed an untouched triad instead of wasting flexibility on 9 points.
     const aiTriads = [
       { ...makeTriad(0, 0, 0), isDiscarded: true },          // T1: discarded
       makeTriad(0, 9, 0),                                     // T2: [0,9,0]
@@ -729,15 +729,14 @@ describe('aiDecideAction — KAPOW opportunity cost', () => {
     const state = makeAiState(aiTriads, { phase: 'playing' });
     const action = aiDecideAction(state, drawnKapow);
 
-    // Candidate scoring picks T2-middle: KAPOW completes [0,K!,0] with +200 bonus.
+    // Completion bonus suppressed — KAPOW goes to a face-down slot, not T2 completion
     expect(action.type).toBe('replace');
-    expect(action.triadIndex).toBe(1); // T2 — KAPOW completion wins
-    expect(action.position).toBe('middle');
+    expect(action.triadIndex).not.toBe(1); // NOT T2
   });
 
   test('R2T16 guard: high-value KAPOW completion is not skipped', () => {
     // Same structure but T2 has [10,9,10] — completing saves 29 points.
-    // fdCount=5, threshold=15. 29 > 15 → completion bonus applies.
+    // fdCount=5, savingsFloor=15. 29 > 15 → completion bonus applies.
     const aiTriads = [
       { ...makeTriad(0, 0, 0), isDiscarded: true },
       makeTriad(10, 9, 10),                                   // T2: [10,9,10]
@@ -750,6 +749,28 @@ describe('aiDecideAction — KAPOW opportunity cost', () => {
 
     expect(action.type).toBe('replace');
     expect(action.triadIndex).toBe(1); // T2 — high-value completion kept
+  });
+
+  test('R1T4: fixed card skips low-value completion when triad contains KAPOW', () => {
+    // AI hand: T1[fd,6,fd] T2[fd,K!,P1] T3[fd,fd,fd] T4[fd,fd,fd]
+    // Drawn: 1. Placing in T2-top → [1,K!(1),P1(1)] → [1,1,1] set → complete.
+    // But this wastes KAPOW's flexibility at turn 4 to save ~2 real points.
+    // adjustedExistingPoints: K!(8 early) + P1(1) = 9. currentSlotValue: 6 (fd).
+    // totalTriadPoints = 15. fdCount = 8 (T1:2, T3:3, T4:3). savingsFloor = 24.
+    // 15 < 24 → completion bonus suppressed. Card goes to a better spot.
+    const aiTriads = [
+      makeTriad(fc(5, false), fc(6), fc(5, false)),                    // T1: [fd,6,fd]
+      makeTriad(fc(5, false), kapowCard(), powerCard(1, [-1, 1])),     // T2: [fd,K!,P1]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),             // T3: [fd,fd,fd]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),             // T4: [fd,fd,fd]
+    ];
+    const drawn = fc(1);
+    const state = makeAiState(aiTriads, { phase: 'playing', turnNumber: 4 });
+    const action = aiDecideAction(state, drawn);
+
+    // Completion bonus suppressed — 1 should NOT complete T2
+    expect(action.type).toBe('replace');
+    expect(action.triadIndex).not.toBe(1); // NOT T2
   });
 });
 

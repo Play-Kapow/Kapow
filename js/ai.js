@@ -1809,14 +1809,43 @@ export function aiScorePlacement(hand, card, triadIndex, position, options, game
     // discarded. The penalty was computed before we knew placement completes.
     score -= existingSynergyPenalty;
 
-    // KAPOW opportunity cost: during playing phase, check whether KAPOW is worth
-    // more as a flexible wild card than completing this low-value triad.
+    // KAPOW opportunity cost: during playing phase, check whether completing this
+    // low-value triad is worth burning a KAPOW's flexibility.
+    // Applies when the PLACED card is KAPOW or the triad already CONTAINS a KAPOW.
     // Count face-down cards in other non-discarded triads — more unknowns means
     // more future value for KAPOW, so the bar for burning it on a completion rises.
+    // Uses turn-adjusted KAPOW values (not raw 25) because early-round KAPOW is a
+    // strategic asset, not a liability — it will almost certainly be used productively.
     var applyCompletionBonus = true;
-    if (card.type === 'kapow' && gameState && gameState.phase === 'playing') {
-      var currentSlotValue = isUnrevealed ? 6 : getPositionValue(triad[positions[posIdx]]);
-      var totalTriadPoints = existingPoints + currentSlotValue;
+    var triadHasKapow = false;
+    for (var kci = 0; kci < 3; kci++) {
+      var kcCards = triad[positions[kci]];
+      if (kcCards.length > 0 && kcCards[0].type === 'kapow') { triadHasKapow = true; break; }
+    }
+    if ((card.type === 'kapow' || triadHasKapow) && gameState && gameState.phase === 'playing') {
+      // Compute totalTriadPoints using turn-adjusted KAPOW values.
+      // Raw getPositionValue returns 25 for KAPOW, making low-value completions look
+      // like they save 25+ points. But early-game KAPOW is realistically ~8 points
+      // (it will be used productively before end of round). Using 25 defeats the check.
+      var kapowTurnOC = gameState.turnNumber;
+      var kapowAdjustedValue = kapowTurnOC <= 6 ? 8 : kapowTurnOC <= 12 ? 15 : 25;
+      var currentSlotValue = isUnrevealed ? 6 : getPositionValue(origCards);
+      // Recompute existingPoints with KAPOW adjustment for the opportunity cost check
+      var adjustedExistingPoints = 0;
+      for (var aei = 0; aei < 3; aei++) {
+        if (aei === posIdx) continue;
+        var aeCards = triad[positions[aei]];
+        if (aeCards.length > 0 && aeCards[0].isRevealed) {
+          adjustedExistingPoints += (aeCards[0].type === 'kapow') ? kapowAdjustedValue : getPositionValue(aeCards);
+        } else {
+          adjustedExistingPoints += 6;
+        }
+      }
+      // Also adjust currentSlotValue if the original card was KAPOW
+      if (origCards.length > 0 && origCards[0].type === 'kapow') {
+        currentSlotValue = kapowAdjustedValue;
+      }
+      var totalTriadPoints = adjustedExistingPoints + currentSlotValue;
       var fdCount = 0;
       for (var ft = 0; ft < hand.triads.length; ft++) {
         if (ft === triadIndex) continue;
