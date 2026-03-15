@@ -6,6 +6,13 @@
 
 ### 03-14-2026
 
+**v9 [Chuck]** ai: powerset completion now detected when modifier raises effective value (R1T26)
+- T2[P2(2), 2, P1(1)] + draw 1: powerset with P1+1→eff 2 completes [2,2,2] set, scored only 13
+- Bug 1: `aiFindPowersetOpportunity()` always picked the lowest-value modifier, never tried the other
+- Bug 2: outer scoring in `aiDecideAction()` used `improvement + 10`, dropping the inner function's completion bonus (80)
+- Fix: try both modifiers per power card; return completion bonus to candidate comparison
+- 2 regression tests added
+
 **v8 [Chuck]** ai: fix KAPOW opportunity cost for triads containing KAPOW (R1T4)
 - Completing T2[fd,K!,P1] with a 1 saved only ~2 real points but burned KAPOW flexibility at turn 4
 - Bug 1: opportunity cost check only fired when the *placed* card was KAPOW, not when triad *contained* KAPOW

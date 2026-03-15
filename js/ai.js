@@ -335,17 +335,12 @@ export function aiDecideAction(gameState, drawnCard) {
   if (drawnCard.type === 'fixed' || drawnCard.type === 'power') {
     var powersetSpot = aiFindPowersetOpportunity(aiHand, drawnCard);
     if (powersetSpot) {
-      // Score it comparably: use the triad score improvement
-      var existingValue = getPositionValue(aiHand.triads[powersetSpot.triadIndex][powersetSpot.position]);
-      var modCard = aiHand.triads[powersetSpot.triadIndex][powersetSpot.position][0];
-      var modValue = powersetSpot.usePositive ? modCard.modifiers[1] : modCard.modifiers[0];
-      var pspNewValue = (drawnCard.type === 'fixed' ? drawnCard.faceValue : drawnCard.faceValue) + modValue;
-      var improvement = existingValue - pspNewValue;
-      // On final turns, no bonus — pure score shedding only
+      // Use the inner function's score (includes triad completion bonus, KAPOW burial, etc.)
+      // On final turns, strip the generic bonus — pure score shedding only
       var pspBonus = isFinalTurnPSP ? 0 : 10;
       candidates.push({
         action: powersetSpot,
-        score: improvement + pspBonus,
+        score: powersetSpot.score + pspBonus,
         reason: 'creates powerset in Triad ' + (powersetSpot.triadIndex + 1)
       });
     }
@@ -2485,60 +2480,60 @@ export function aiFindPowersetOpportunity(hand, drawnCard) {
       if (posCards.length !== 1 || posCards[0].type !== 'power' || !posCards[0].isRevealed) continue;
 
       var powerCard = posCards[0];
-      var withNegMod = drawnValue + powerCard.modifiers[0];
-      var withPosMod = drawnValue + powerCard.modifiers[1];
       var currentValue = getPositionValue(posCards);
-
-      var bestMod = withNegMod < withPosMod ? withNegMod : withPosMod;
-      var usePositive = withPosMod <= withNegMod;
-
-      // Score = improvement over current value
-      var improvement = currentValue - bestMod;
-      if (improvement <= 0) continue;
-
-      // Simulate the powerset and check triad-building potential
       var origCards = triad[positions[p]];
-      var simPower = { id: powerCard.id, type: 'power', faceValue: powerCard.faceValue,
-        modifiers: powerCard.modifiers, isRevealed: true, isFrozen: false,
-        activeModifier: usePositive ? powerCard.modifiers[1] : powerCard.modifiers[0] };
-      var simFace = { id: drawnCard.id, type: drawnCard.type, faceValue: drawnCard.faceValue,
-        modifiers: drawnCard.modifiers, isRevealed: true,  };
-      triad[positions[p]] = [simFace, simPower];
 
-      var triadBonus = 0;
-      if (isTriadComplete(triad)) {
-        triadBonus = 80;
-      } else {
-        var analysis = aiAnalyzeTriad(triad);
-        if (analysis.isNearComplete && (analysis.completionPaths > 0 || analysis.powerModifierPaths > 0)) {
-          triadBonus = 10 + (analysis.completionPaths * 2) + analysis.powerModifierPaths;
-          if (analysis.kapowBoost) triadBonus += 1;
-        }
-      }
-
-      triad[positions[p]] = origCards; // restore
-
-      // Bonus for setting up KAPOW burial: if this triad has other positions with KAPOW cards,
-      // creating a powerset here enables swapping KAPOW to safer positions before discard
+      // Bonus for setting up KAPOW burial (shared across both modifiers)
       var kapowBuryBonus = 0;
       var kapowSwapdPositionsCount = 0;
       for (var kb = 0; kb < positions.length; kb++) {
         if (kb !== p && triad[positions[kb]][0] && triad[positions[kb]][0].type === 'kapow' && triad[positions[kb]][0].isRevealed) {
-          kapowBuryBonus += 8;  // reward for enabling KAPOW swap setups
+          kapowBuryBonus += 8;
           kapowSwapdPositionsCount++;
         }
       }
-
-      // Positional preference: top position is more strategic for swaps (more movement flexibility)
       var positionBonus = 0;
       if (kapowSwapdPositionsCount > 0 && positions[p] === 'top') {
-        positionBonus = 6;  // slight preference for top position when setting up KAPOW swaps
+        positionBonus = 6;
       }
 
-      var totalScore = improvement + triadBonus + kapowBuryBonus + positionBonus;
-      if (totalScore > bestScore) {
-        bestScore = totalScore;
-        best = { type: 'powerset-on-power', triadIndex: t, position: positions[p], usePositive: usePositive };
+      // Try BOTH modifiers — one might complete the triad even if it has a higher effective value
+      for (var mi = 0; mi < 2; mi++) {
+        var isPos = mi === 1;
+        var modValue = isPos ? powerCard.modifiers[1] : powerCard.modifiers[0];
+        var effectiveValue = drawnValue + modValue;
+        var improvement = currentValue - effectiveValue;
+
+        // Simulate the powerset and check triad-building potential
+        var simPower = { id: powerCard.id, type: 'power', faceValue: powerCard.faceValue,
+          modifiers: powerCard.modifiers, isRevealed: true, isFrozen: false,
+          activeModifier: modValue };
+        var simFace = { id: drawnCard.id, type: drawnCard.type, faceValue: drawnCard.faceValue,
+          modifiers: drawnCard.modifiers, isRevealed: true };
+        triad[positions[p]] = [simFace, simPower];
+
+        var triadBonus = 0;
+        if (isTriadComplete(triad)) {
+          triadBonus = 80;
+        } else {
+          if (improvement <= 0) { triad[positions[p]] = origCards; continue; }
+          var analysis = aiAnalyzeTriad(triad);
+          if (analysis.isNearComplete && (analysis.completionPaths > 0 || analysis.powerModifierPaths > 0)) {
+            triadBonus = 10 + (analysis.completionPaths * 2) + analysis.powerModifierPaths;
+            if (analysis.kapowBoost) triadBonus += 1;
+          }
+        }
+
+        triad[positions[p]] = origCards; // restore
+
+        var totalScore = improvement + triadBonus + kapowBuryBonus + positionBonus;
+        if (totalScore > bestScore) {
+          bestScore = totalScore;
+          // Return improvement for candidate comparison; only include completion bonus (80)
+          // Near-complete analysis bonuses are for internal spot selection, not candidate comparison
+          var candidateScore = triadBonus >= 80 ? improvement + triadBonus : improvement;
+          best = { type: 'powerset-on-power', triadIndex: t, position: positions[p], usePositive: isPos, score: candidateScore };
+        }
       }
     }
   }

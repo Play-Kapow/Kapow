@@ -380,6 +380,25 @@ describe('aiDecideAction', () => {
     expect(action.position).toBe('middle'); // +1 on the 6 to make 7, completing [7,7,7]
   });
 
+  test('R1T26: powerset completion beats simple replacement (powerset-on-power)', () => {
+    // Reproduces R1T26: AI has T2[P2(2), 2, P1(1)], T3[fd, 5, fd]. Drew 1.
+    // Powerset completions: P1+1→[2,2,2] set OR P2+2→[3,2,1] run — both complete T2
+    // Simple replacement: T3-middle 5→1 saves 4 points.
+    // Powerset completion eliminates entire triad — must win.
+    const aiTriads = [
+      { ...makeTriad(fc(1), fc(1), fc(1)), isDiscarded: true },           // T1 discarded
+      makeTriad(powerCard(2, [-2, 2]), fc(2), powerCard(1, [-1, 1])),     // T2: [P2, 2, P1]
+      makeTriad(fc(5, false), fc(5), fc(5, false)),                       // T3: [fd, 5, fd]
+      { ...makeTriad(fc(1), fc(1), fc(1)), isDiscarded: true },           // T4 discarded
+    ];
+    const state = makeAiState(aiTriads, { phase: 'playing', turnNumber: 26 });
+    const action = aiDecideAction(state, fc(1));
+
+    expect(action.type).toBe('powerset-on-power');
+    expect(action.triadIndex).toBe(1);  // T2
+    expect(action.usePositive).toBe(true);  // completing modifier
+  });
+
   test('replaces known high card over unrevealed card', () => {
     // Drawn 3, hand has [8, 2, hidden(4)] and a second triad to prevent forced go-out.
     // Candidate scoring: replacing 8 (top) with 3 saves 5 points directly.
@@ -1652,6 +1671,25 @@ describe('aiFindPowersetOpportunity', () => {
     const hand = { triads: [makeTriad(powerCard(), 5, 7)] };
     const result = aiFindPowersetOpportunity(hand, kapowCard());
     expect(result).toBeNull();
+  });
+
+  test('R1T26: prefers completing modifier over lowest-value modifier', () => {
+    // T2: [P2(2), 2, P1(1)] — drawing 1
+    // P1 with +1 modifier: effective 2 → T2 = [2,2,2] set → complete!
+    // P2 with +2 modifier: effective 3 → T2 = [3,2,1] descending run → also complete!
+    // Both complete the triad — either is acceptable
+    const triad = {
+      top: [powerCard(2, [-2, 2])],
+      middle: [fc(2)],
+      bottom: [powerCard(1, [-1, 1])],
+      isDiscarded: false
+    };
+    const hand = { triads: [triad] };
+    const result = aiFindPowersetOpportunity(hand, fc(1));
+    expect(result).not.toBeNull();
+    // Both P2-top (+2→[3,2,1] run) and P1-bottom (+1→[2,2,2] set) complete the triad
+    expect(result.score).toBeGreaterThanOrEqual(79); // completion bonus (80) + improvement (-1)
+    expect(result.usePositive).toBe(true);
   });
 });
 
