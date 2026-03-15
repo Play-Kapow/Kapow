@@ -833,6 +833,40 @@ describe('Low-value starter bonus (untouched triad preference)', () => {
   });
 });
 
+describe('Power card seeding (powerset path expansion)', () => {
+  test('R4T9: P2 placed next to 7 for powerset expansion over untouched triad', () => {
+    // Chuck's strategy: P2(±2) next to 7 means future draws 4,5,6,8,9,10 can create
+    // powerset with effective values 6,7,8 — high completion potential.
+    // Without fix: P2 (fv=2) has zero face-value synergy with 7, gets penalty, loses to untouched triad.
+    // With fix: powerset expansion paths (6 draws) suppress penalty and add bonus.
+    const aiTriads = [
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T1: untouched
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T2: untouched
+      makeTriad(fc(5, false), fc(7), fc(5, false)),             // T3: [fd, 7, fd]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T4: untouched
+    ];
+    const state = makeAiState(aiTriads, { phase: 'playing', turnNumber: 9 });
+    const action = aiDecideAction(state, powerCard(2, [-2, 2]));
+
+    expect(action.triadIndex).toBe(2); // T3 — powerset expansion with 7
+  });
+
+  test('R4T9 guard: P2 not seeded next to 12 (positive modifier wasted)', () => {
+    // P2(±2) next to 12: only 2 useful draws (10→12 via +2, 11 doesn't work).
+    // Below threshold of 3 powerset paths — should NOT get the seeding bonus.
+    const aiTriads = [
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T1: untouched
+      makeTriad(fc(5, false), fc(12), fc(5, false)),            // T2: [fd, 12, fd]
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T3: untouched
+      makeTriad(fc(5, false), fc(5, false), fc(5, false)),      // T4: untouched
+    ];
+    const state = makeAiState(aiTriads, { phase: 'playing', turnNumber: 9 });
+    const action = aiDecideAction(state, powerCard(2, [-2, 2]));
+
+    expect(action.triadIndex).not.toBe(1); // NOT T2 — edge value, no expansion benefit
+  });
+});
+
 describe('Discard-aware placement (discard safety swap)', () => {
   test('R2T22: places drawn 7 instead of discarding when opponent needs a 7', () => {
     // AI hand: T1 discarded, T2[6,6,7] all revealed, T3[fd,fd,fd], T4[fd,P2,3]

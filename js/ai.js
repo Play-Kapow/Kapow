@@ -1550,6 +1550,7 @@ export function aiScorePlacement(hand, card, triadIndex, position, options, game
   // the existing revealed cards in this triad already have good synergy.
   // If so, only place a card that FITS with them — don't ruin a promising triad.
   var existingSynergyPenalty = 0;
+  var hasPowersetExpansion = false; // set true when power card seeding creates future paths
   if (isUnrevealed && card.type !== 'kapow') {
     // KAPOW is wild (0-12) — it has synergy with every card, so skip this penalty.
     // Gather existing revealed values and their positions in this triad
@@ -1584,23 +1585,73 @@ export function aiScorePlacement(hand, card, triadIndex, position, options, game
         }
       }
       if (directPaths === 0) {
-        // Zero direct completion paths — this card doesn't work with the existing one.
-        // Penalty scales with card value (placing a high misfit card is worse).
-        // BUT: soften the penalty early in the round. Early on, the third (face-down) card
-        // is unknown and building in any triad is still valuable. Applying a heavy penalty
-        // for "no synergy with 1 card" causes the AI to avoid spreading and instead pile
-        // cards into its strongest triad for marginal gains.
-        var turnNum3 = gameState ? gameState.turnNumber : 10;
-        var valuePenalty1 = Math.max(0, newValue - 5);
-        if (turnNum3 <= 6) {
-          // Early game: minimal penalty — spreading is more important than perfect synergy
-          existingSynergyPenalty = -2 - valuePenalty1;
-        } else if (turnNum3 <= 12) {
-          // Mid game: moderate penalty
-          existingSynergyPenalty = -5 - valuePenalty1;
-        } else {
-          // Late game: full penalty — no time to fix bad pairings
-          existingSynergyPenalty = -8 - (valuePenalty1 * 2);
+        // Powerset expansion check: when placing a power card next to a revealed neighbor,
+        // the face value may have zero direct synergy (e.g., P2 fv=2 next to 7), but future
+        // draws placed as powersets use the modifier range to create many completion paths.
+        // E.g., P2(±2) next to 7: draws of 4,5,6,8,9,10 can all become 6/7/8 via modifier,
+        // creating set or run potential. This captures the "power card seeding" strategy.
+        var suppressedByPowerset = false;
+        if (card.type === 'power' && gameState && gameState.phase === 'playing') {
+          var psTurnNum = gameState.turnNumber || 0;
+          if (psTurnNum <= 16) {
+            var psNeighborValue = existingRevealed[0].value;
+            var psNeighborPosIdx = existingRevealed[0].posIdx;
+            var powersetExpPaths = 0;
+            for (var px = 0; px <= 12; px++) {
+              var pxFound = false;
+              for (var pmi = 0; pmi < 2 && !pxFound; pmi++) {
+                var psEffVal = px + card.modifiers[pmi];
+                if (psEffVal < 0 || psEffVal > 12) continue;
+                var psTestVals = [null, null, null];
+                psTestVals[posIdx] = psEffVal;
+                psTestVals[psNeighborPosIdx] = psNeighborValue;
+                var psMissIdx = -1;
+                for (var psi = 0; psi < 3; psi++) {
+                  if (psTestVals[psi] === null) { psMissIdx = psi; break; }
+                }
+                if (psMissIdx >= 0) {
+                  for (var psv = 0; psv <= 12; psv++) {
+                    psTestVals[psMissIdx] = psv;
+                    if (isSet(psTestVals) || isAscendingRun(psTestVals) || isDescendingRun(psTestVals)) {
+                      powersetExpPaths++;
+                      pxFound = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+            if (powersetExpPaths >= 3) {
+              // Meaningful expansion — suppress zero-synergy penalty, add bonus
+              var psEarlyFactor = psTurnNum <= 6 ? 1.5 : psTurnNum <= 12 ? 1.0 : 0.5;
+              var psBonus = Math.min(powersetExpPaths, 8) * psEarlyFactor;
+              // Boost for higher-value neighbors (more points shed on completion)
+              if (psNeighborValue >= 5) psBonus += 2;
+              existingSynergyPenalty = Math.round(psBonus);
+              suppressedByPowerset = true;
+              hasPowersetExpansion = true;
+            }
+          }
+        }
+        if (!suppressedByPowerset) {
+          // Zero direct completion paths — this card doesn't work with the existing one.
+          // Penalty scales with card value (placing a high misfit card is worse).
+          // BUT: soften the penalty early in the round. Early on, the third (face-down) card
+          // is unknown and building in any triad is still valuable. Applying a heavy penalty
+          // for "no synergy with 1 card" causes the AI to avoid spreading and instead pile
+          // cards into its strongest triad for marginal gains.
+          var turnNum3 = gameState ? gameState.turnNumber : 10;
+          var valuePenalty1 = Math.max(0, newValue - 5);
+          if (turnNum3 <= 6) {
+            // Early game: minimal penalty — spreading is more important than perfect synergy
+            existingSynergyPenalty = -2 - valuePenalty1;
+          } else if (turnNum3 <= 12) {
+            // Mid game: moderate penalty
+            existingSynergyPenalty = -5 - valuePenalty1;
+          } else {
+            // Late game: full penalty — no time to fix bad pairings
+            existingSynergyPenalty = -8 - (valuePenalty1 * 2);
+          }
         }
       }
     } else if (existingRevealed.length === 2) {
@@ -2063,8 +2114,15 @@ export function aiScorePlacement(hand, card, triadIndex, position, options, game
       score += 15 + (analysis.completionPaths * 4);
     } else if (analysis.revealedCount === 2 && analysis.completionPaths === 0) {
       // Two revealed cards with NO path to completion — BAD placement
-      // Penalize heavily: these cards don't work together
-      score -= 15;
+      // UNLESS this is a power card seeding play: the standard path check uses face value,
+      // but a power card's modifier range creates future powerset completion paths that
+      // the analysis doesn't see. Skip the penalty and add a small bonus instead.
+      if (hasPowersetExpansion) {
+        score += 5; // powerset expansion creates hidden completion paths
+      } else {
+        // Penalize heavily: these cards don't work together
+        score -= 15;
+      }
     }
 
     // If triad only has 1 revealed card after placement (the one we just placed),

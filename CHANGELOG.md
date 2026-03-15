@@ -6,6 +6,14 @@
 
 ### 03-14-2026
 
+**v10 [Chuck]** ai: power card seeding strategy — place power cards for powerset path expansion (R4T9)
+- P2(±2) next to a 7 has zero face-value synergy but huge powerset potential: future draws 4,5,6,8,9,10 can create effective values 6/7/8 via modifier
+- AI treated power cards by face value only — P2(fv=2) next to 7 got zero-synergy penalty and lost to untouched triads
+- New: `aiScorePlacement()` counts powerset expansion paths (future draws that create completion potential via modifier range)
+- Suppresses synergy penalty and 2-revealed-0-paths penalty when expansion paths ≥ 3, adds scaling bonus
+- Best with mid-range neighbors (5-8) and early game; naturally rejects edge values (0-1, 11-12) where modifiers overshoot
+- 2 regression tests added (R4T9 scenario + edge value guard)
+
 **v9 [Chuck]** ai: powerset completion now detected when modifier raises effective value (R1T26)
 - T2[P2(2), 2, P1(1)] + draw 1: powerset with P1+1→eff 2 completes [2,2,2] set, scored only 13
 - Bug 1: `aiFindPowersetOpportunity()` always picked the lowest-value modifier, never tried the other
